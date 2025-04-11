@@ -1,17 +1,56 @@
 [project]
-name = "xml-converter"
-version = "0.1.0"
+name = "ftbatch-recipe-bulk-edit"
+version = "0.1.0" # removed for dynamic versions
+# dynamic = ["version"]
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "lxml>=5.3.1",
+    # "uv-dynamic-versioning>=0.5.0",
     "openpyxl>=3.1.5",
-    "pandas>=2.2.3",
-    "pydantic>=2.10.6",
 ]
 
 [dependency-groups]
 dev = [
-    "commitizen>=4.2.2",
+    "commitizen>=4.2.1",
+    "mypy>=1.15.0",
+    "pre-commit>=4.1.0",
+    "pydantic>=2.10.6",
+    "pytest>=8.3.4",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "app" # the pytests can import modules from this folder
+]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "semver"
+version_provider = "pep621"
+update_changelog_on_bump = true
+major_version_zero = true
+
+# [semantic_release.branches.main]
+# match = "(main|master)"
+# prerelease_token = "rc"
+# prerelease = false
+
+
+# ! Build related tables
+
+# [tool.uv-dynamic-versioning]
+# vcs = "git"
+# style = "semver"
+
+# [build-system]
+# requires = ["hatchling", "uv-dynamic-versioning"]
+# build-backend = "hatchling.build"
+
+# [tool.hatch.version]
+# source = "uv-dynamic-versioning"
+
+# [tool.hatch.build.hooks.uv-dynamic-versioning]
+# version-file = "_version.py"
