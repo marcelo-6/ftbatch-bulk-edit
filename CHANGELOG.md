@@ -1,3 +1,27 @@
+## 0.1.4 (2025-05-19)
+
+### Fix
+
+- **makefile**: exe will now generate metadata correctly
+
+## 0.1.3 (2025-05-19)
+
+### Fix
+
+- removed vscode settings from git
+
+## 0.1.2 (2025-05-19)
+
+### Feat
+
+- **makefile**: add Make commands, making it easier to build / prepare to build. The pyinstaller still needs to run from windows
+
+## 0.1.1 (2025-05-19)
+
+### Fix
+
+- **xml generation**: order of new parameters creation is now pre-determined
+
 ## 0.1.0 (2025-03-16)
 
 ### BREAKING CHANGE

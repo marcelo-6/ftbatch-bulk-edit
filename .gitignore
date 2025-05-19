@@ -9,13 +9,16 @@ __pycache__/
 # folders
 tests/examples/converted-outputs*/*
 tests/examples/excel_test.xlsx
+.vscode*
 
 # Distribution / packaging
 .Python
 build/
 develop-eggs/
 dist/*
-!dist/batch_bulk_editor.exe
+# !dist/batch_bulk_editor.exe
+*.zip
+version_info*
 downloads/
 eggs/
 .eggs/
