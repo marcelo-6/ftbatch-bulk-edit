@@ -4,22 +4,26 @@ A command‐line tool (Python‐based) that allows bulk editing of Rockwell Fact
 
 ## Table of Contents
 
-- [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-  - [Using pip](#using-pip)
-  - [Using a Python Virtual Environment](#using-a-python-virtual-environment)
-  - [Using uv as the Package Manager](#using-uv-as-the-package-manager)
-- [Usage Overview](#usage-overview)
-  - [Export XML to Excel (xml2excel)](#export-xml-to-excel-xml2excel)
-  - [Import Excel to XML (excel2xml)](#import-excel-to-xml-excel2xml)
+- [Bulk Editor for FactoryTalk Batch Recipes](#bulk-editor-for-factorytalk-batch-recipes)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+    - [Using pip](#using-pip)
+    - [Using a Python Virtual Environment](#using-a-python-virtual-environment)
+    - [Using uv as the Package Manager](#using-uv-as-the-package-manager)
+    - [Using a Python Virtual Environment](#using-a-python-virtual-environment-1)
+    - [Using uv as the Package Manager](#using-uv-as-the-package-manager-1)
+    - [Using the Makefile (Recommended)](#using-the-makefile-recommended)
+  - [Usage Overview](#usage-overview)
+    - [Export XML to Excel (`xml2excel`)](#export-xml-to-excel-xml2excel)
+    - [Import Excel to XML (`excel2xml`)](#import-excel-to-xml-excel2xml)
   - [Debug Mode](#debug-mode)
   - [Flow Chart](#flow-chart)
-- [Example Excel Output](#example-excel-output)
-  - [Example XML Schema Snippet](#example-xml-schema-snippet)
-- [Makefile Usage](#makefile-usage)
-- [Preservation Rules & Edge Cases](#preservation-rules--edge-cases)
-- [Troubleshooting](#troubleshooting)
+  - [Example Excel Output](#example-excel-output)
+    - [Example XML Schema Snippet](#example-xml-schema-snippet)
+  - [Preservation Rules \& Edge Cases](#preservation-rules--edge-cases)
+  - [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -62,14 +66,14 @@ You have multiple options for installing dependencies and running the script:
 
 ### Using pip
 
-1. **Clone or Download** this repository, ensuring `batch_bulk_editor.py` is present.
+1. **Clone or Download** this repository, ensuring `main.py` is present.
 2. **Install** dependencies with `pip`:
    ```bash
    pip install lxml openpyxl
    ```
 3. **Run** using Python:
    ```bash
-   python batch_bulk_editor.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
+   python main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
    ```
 
 ### Using a Python Virtual Environment
@@ -93,7 +97,7 @@ You have multiple options for installing dependencies and running the script:
    ```
 4. **Run** the tool:
    ```bash
-   python batch_bulk_editor.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
+   python main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
    ```
 
 ### Using uv as the Package Manager
@@ -111,21 +115,99 @@ If you prefer to manage dependencies via [uv](https://astral.sh/blog/uv) and hav
    ```
 3. **Run** the tool via uv’s environment:
    ```bash
-   uv run python batch_bulk_editor.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
+   uv run python app/main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
    ```
 
 *(Behind the scenes, `uv` will create and manage a virtual environment and install packages listed in your `pyproject.toml`.)*
+
+Here’s a revised **Installation** section that adds a **“Using the Makefile”** option—so folks can simply run one or two `make` commands instead of typing everything manually:
+
+````markdown
+## Installation
+
+You have multiple options for installing dependencies and running the script:
+
+### Using pip
+
+1. **Clone** this repository, ensuring `batch_bulk_editor.py` (or `main.py`) is present.  
+2. **Install** dependencies:
+   ```bash
+   pip install lxml openpyxl
+````
+
+3. **Run** the tool:
+
+   ```bash
+   python batch_bulk_editor.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
+   ```
+
+### Using a Python Virtual Environment
+
+1. **Create** a venv:
+
+   ```bash
+   python -m venv venv
+   ```
+2. **Activate** it:
+
+   * **Windows**: `venv\Scripts\activate`
+   * **macOS/Linux**: `source venv/bin/activate`
+3. **Install** packages:
+
+   ```bash
+   pip install lxml openpyxl
+   ```
+4. **Run**:
+
+   ```bash
+   python batch_bulk_editor.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
+   ```
+
+### Using uv as the Package Manager
+
+If you manage dependencies via [uv](https://astral.sh/blog/uv) (with your `pyproject.toml` already set up):
+
+1. **Initialize** and install:
+
+   ```bash
+   uv init
+   uv install
+   ```
+2. **Run** in uv’s venv:
+
+   ```bash
+   uv run python batch_bulk_editor.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
+   ```
+
+### Using the Makefile (Recommended)
+
+We provide a Makefile that automates every step—no manual activation or long commands required:
+
+```bash
+# 1) Install/prepare everything:
+make all
+
+# or step by step:
+make check-uv        # ensure uv is installed
+make install         # uv init & uv sync (installs deps)
+make meta            # print name/version/description
+make version         # generate version_info.txt
+make build           # bundle source for Windows build
+make clean           # remove build artifacts
+```
+
+* **`make all`** runs **check-uv**, **install**, **meta**, **version**, **build**, then **clean**.
 
 ---
 
 ## Usage Overview
 
-The script `batch_bulk_editor.py` offers two sub‐commands:
+The script `main.py` offers two sub‐commands:
 
 ### Export XML to Excel (`xml2excel`)
 
 ```bash
-python batch_bulk_editor.py xml2excel --xml PATH_TO_XML --excel OUTPUT_EXCEL [--debug]
+python main.py xml2excel --xml PATH_TO_XML --excel OUTPUT_EXCEL [--debug]
 ```
 
 | Argument         | Description                                                                                           |
@@ -137,7 +219,7 @@ python batch_bulk_editor.py xml2excel --xml PATH_TO_XML --excel OUTPUT_EXCEL [--
 ### Import Excel to XML (`excel2xml`)
 
 ```bash
-python batch_bulk_editor.py excel2xml --xml PATH_TO_XML --excel EDITED_EXCEL [--debug]
+python main.py excel2xml --xml PATH_TO_XML --excel EDITED_EXCEL [--debug]
 ```
 
 | Argument         | Description                                                                                            |
@@ -153,7 +235,7 @@ python batch_bulk_editor.py excel2xml --xml PATH_TO_XML --excel EDITED_EXCEL [--
 Add `--debug` **before** the sub‐command to enable verbose logs:
 
 ```bash
-python batch_bulk_editor.py --debug xml2excel --xml myRecipe.pxml --excel out.xlsx
+python main.py --debug xml2excel --xml myRecipe.pxml --excel out.xlsx
 ```
 
 - Creates or appends to `batch_bulk_editor.log` with detailed debug info.

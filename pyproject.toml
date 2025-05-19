@@ -1,14 +1,18 @@
 [project]
-name = "ftbatch-recipe-bulk-edit"
-version = "0.1.0" # removed for dynamic versions
+name = "ftbatch-bulk-edit"
+version = "0.1.4" # removed for dynamic versions
 # dynamic = ["version"]
-description = "Add your description here"
+authors = [
+  { name = "Marcelo Amorim", email = "marcelo.amorim@wmeng.com" },
+  { name = "Dan Nguyen", email = "dan.nguyen@wmeng.com" },
+]
+description = "FactoryTalk Batch Bulk Editor"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "lxml>=5.3.1",
-    # "uv-dynamic-versioning>=0.5.0",
     "openpyxl>=3.1.5",
+    "toml>=0.10.2",
 ]
 
 [dependency-groups]
