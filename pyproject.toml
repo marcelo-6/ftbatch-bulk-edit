@@ -1,6 +1,6 @@
 [project]
 name = "ftbatch-bulk-edit"
-version = "0.1.4" # removed for dynamic versions
+version = "0.2.0" # removed for dynamic versions
 # dynamic = ["version"]
 authors = [
   { name = "Marcelo Amorim", email = "marcelo.amorim@wmeng.com" },

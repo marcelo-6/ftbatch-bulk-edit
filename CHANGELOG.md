@@ -1,3 +1,13 @@
+## 0.2.0 (2025-05-21)
+
+### Fix
+
+- **xml generation**: add extended debug logging
+
+### Refactor
+
+- reorganized code to make it easier to troubleshoot and read
+
 ## 0.1.4 (2025-05-19)
 
 ### Fix
