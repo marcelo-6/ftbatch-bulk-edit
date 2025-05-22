@@ -1,7 +1,6 @@
 PYPROJECT     = pyproject.toml
 VERSION_FILE  = version_info.txt
 SRC           = app/main.py
-MAIN          = main.py
 
 # # Get the project name from pyproject.toml
 PKG_NAME := $(shell uv run python3 -c "import toml; print(toml.load('$(PYPROJECT)')['project']['name'])")
@@ -137,12 +136,14 @@ version: install
 # 5) Build the standalone EXE with PyInstaller
 build: version
 	@echo "📦 [5/6] Bundling source for Windows build…"
-	@echo "         cleaning out any old bundle dir"
+	@echo "         cleaning out old bundle directory"
 	rm -rf $(BUILD_DIR)
+
 	@echo "         gathering just the files we need"
-	echo "Make sure you have python 3.12+ and pyinstaller, then run this on windows:\npython -m PyInstaller --onefile --name $(PKG_NAME).exe $(MAIN) --version-file=$(VERSION_FILE)" > readme.txt
+	echo "Make sure you have python 3.12+ and pyinstaller, then run this on windows:\npython -m PyInstaller --onefile --name $(PKG_NAME).exe $(SRC) --version-file=$(VERSION_FILE)" > readme.txt
 	mkdir -p $(BUILD_DIR)
-	cp $(SRC) $(VERSION_FILE) $(BUILD_DIR)/
+
+	cp -r app $(VERSION_FILE) $(BUILD_DIR)/
 	mv readme.txt $(BUILD_DIR)/
 	@echo "         zip it up"
 	@echo "         you might need sudo apt-get install zip if not already installed"
@@ -153,13 +154,7 @@ build: version
 	@echo
 	@echo "🚀 [6/6] On Windows, unzip $(ZIPFILE) then run:"
 	@echo "    python -m PyInstaller --onefile --name $(PKG_NAME).exe $(SRC) --version-file=$(VERSION_FILE)"
-# uv run pyinstaller \
-#   --onefile \
-#   --name $(PKG_NAME) \
-#   $(SRC)
-# @echo "✔ Build complete: dist/$(PKG_NAME).exe"
-# --version-file $(VERSION_FILE) \
-# 6) Clean up all generated artifacts
+
 clean:
 	@echo "🧹 Cleaning up…"
 	rm -rf build dist __pycache__ *.spec $(VERSION_FILE)
