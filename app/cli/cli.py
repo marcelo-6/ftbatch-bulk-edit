@@ -52,16 +52,17 @@ def main():
             ExcelExporter().export(tree, args.excel)
         elif args.cmd == "excel2xml":
             tree = XMLParser().parse(args.xml)
-            ExcelImporter().import_changes(args.excel, tree)
+            stats = ExcelImporter().import_changes(args.excel, tree)
+            logger.info(f"{stats=}")
             out_dir = XMLWriter().write(tree)
             logger.info(f"Wrote updated XML files to {out_dir}")
         else:
             parser.print_help()
     except ValidationError as e:
-        logger.error(f"Validation error: {e}")
+        logger.error(f"Validation error: Aborted due to {e}")
         sys.exit(1)
-    except ValidationError as e:
-        logger.exception("Unexpected error")
+    except Exception as e:
+        logger.exception("Unexpected error :(")
         sys.exit(1)
 
 

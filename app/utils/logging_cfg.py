@@ -34,7 +34,7 @@ def configure_logging(debug_mode: bool) -> None:
 
         # Console at INFO
         ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
+        ch.setLevel(logging.INFO)
         console_formatter = logging.Formatter(
             fmt="[%(asctime)s] %(levelname)s: %(message)s",
             datefmt="%d-%b-%Y %H:%M:%S",

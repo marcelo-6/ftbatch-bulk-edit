@@ -34,6 +34,8 @@ class ExcelImporter:
         errors = []
         stats = {"created": 0, "updated": 0, "deleted": 0}
 
+        log.debug("Importing Excel changes to XML(s)")
+
         # Map sheet name to RecipeTree by basename
         tree_map = {os.path.basename(t.filepath): t for t in trees}
 
@@ -41,10 +43,14 @@ class ExcelImporter:
             if sheet not in tree_map:
                 log.warning("No matching XML for sheet '%s', skipping", sheet)
                 continue
+
+            log.debug(f"Sheet {sheet}")
+
             tree = tree_map[sheet]
             ws = wb[sheet]
             header = [c.value for c in next(ws.iter_rows(min_row=1, max_row=1))]
 
+            excel_param_names = set()
             seen_params = set()
             seen_fvs = set()
 
@@ -56,40 +62,63 @@ class ExcelImporter:
                 tagtype = row_dict.get("TagType", "").strip()
 
                 # Validate single-type
-                types = ["Real", "Integer", "String", "EnumerationSet"]
+                types = ["Real", "Integer", "String", "EnumerationSet", "Defer"]
                 cnt = sum(bool(row_dict.get(t).strip()) for t in types)
-                if cnt != 1:
+                if cnt > 2:
+                    log.error(
+                        f"{sheet}!Row{r_idx}: expected exactly one data type for {fp}"
+                    )
                     errors.append(
                         f"{sheet}!Row{r_idx}: expected exactly one data type for {fp}"
                     )
                     continue
 
                 if tagtype == "Parameter":
+                    excel_param_names.add(row_dict["Name"].strip())
                     node = tree.find_parameter(fp)
+                    log.debug(f"\tWorking on Parameter: {row_dict["Name"].strip()}")
                     if node:
                         node.update_from_dict(row_dict)
+                        log.debug(
+                            f"\tParameter found in XML, updating data to: {row_dict=}"
+                        )
                         stats["updated"] += 1
                     else:
                         tree.create_parameter(row_dict)
+                        log.debug(
+                            f"\tParameter NOT found in XML, creating parameter with: {row_dict=}"
+                        )
                         stats["created"] += 1
                     seen_params.add(fp)
 
                 elif tagtype == "FormulaValue":
                     node = tree.find_formulavalue(fp)
                     defer = row_dict.get("Defer", "").strip()
-                    if defer and not tree.has_parameter_named(defer):
+                    log.debug(f"\tWorking on FormulaValue: {row_dict["Name"].strip()}")
+                    # if defer and not tree.has_parameter_named(defer):
+                    if defer and defer not in excel_param_names:
+                        log.error(
+                            f"{sheet}!Row{r_idx}: defer target '{defer}' not found for {fp}"
+                        )
                         errors.append(
                             f"{sheet}!Row{r_idx}: defer target '{defer}' not found for {fp}"
                         )
                         continue
                     if node:
                         node.update_from_dict(row_dict)
+                        log.debug(
+                            f"\tFormulaValue found in XML, updating data to: {row_dict=}"
+                        )
                         stats["updated"] += 1
                     else:
                         tree.create_formulavalue(row_dict)
+                        log.debug(
+                            f"\tFormulaValue NOT found in XML, creating with: {row_dict=}"
+                        )
                         stats["created"] += 1
                     seen_fvs.add(fp)
                 else:
+                    log.error(f"{sheet}!Row{r_idx}: unknown TagType '{tagtype}'")
                     errors.append(f"{sheet}!Row{r_idx}: unknown TagType '{tagtype}'")
                     continue
 
@@ -98,13 +127,19 @@ class ExcelImporter:
                 if node.fullpath not in seen_params:
                     node.element.getparent().remove(node.element)
                     tree.parameters.remove(node)
+                    log.debug(
+                        f"\tParameter NOT found in Excel but exists in XML, {node.fullpath} deleted.."
+                    )
                     stats["deleted"] += 1
             for node in list(tree.formula_values):
                 if node.fullpath not in seen_fvs:
                     node.element.getparent().remove(node.element)
                     tree.formula_values.remove(node)
+                    log.debug(
+                        f"\tFormulaValue NOT found in Excel but exists in XML, {node.fullpath} deleted.."
+                    )
                     stats["deleted"] += 1
 
         if errors:
-            raise ValidationError("\\n".join(errors))
+            raise ValidationError(f"{len(errors)} errors")
         return stats
