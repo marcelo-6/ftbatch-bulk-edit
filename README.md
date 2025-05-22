@@ -1,6 +1,8 @@
 # Bulk Editor for FactoryTalk Batch Recipes
 
-A command‐line tool (Python‐based) that allows bulk editing of Rockwell FactoryTalk Batch S88 recipes (`.pxml`, `.uxml`, and `.oxml` files) by round‐tripping through Excel. Engineers can **export** these XML files (plus their child references) to an Excel workbook, make changes to parameters/formula values in bulk, and then **import** the changes back to produce updated XML files—while preserving order, empty tags, and existing structure.
+A command-line tool (Python-based) that lets engineers bulk-edit Rockwell FactoryTalk Batch S88 recipes (`.pxml`, `.uxml`, and `.oxml`) by round-tripping through Excel. You can **export** your recipes (including any child references) into a spreadsheet, make batch changes to parameters and formula-values, then **import** the edits back to produce updated XML files—preserving element order, empty tags, and original structure.
+
+---
 
 ## Table of Contents
 
@@ -12,8 +14,6 @@ A command‐line tool (Python‐based) that allows bulk editing of Rockwell Fact
     - [Using pip](#using-pip)
     - [Using a Python Virtual Environment](#using-a-python-virtual-environment)
     - [Using uv as the Package Manager](#using-uv-as-the-package-manager)
-    - [Using a Python Virtual Environment](#using-a-python-virtual-environment-1)
-    - [Using uv as the Package Manager](#using-uv-as-the-package-manager-1)
     - [Using the Makefile (Recommended)](#using-the-makefile-recommended)
   - [Usage Overview](#usage-overview)
     - [Export XML to Excel (`xml2excel`)](#export-xml-to-excel-xml2excel)
@@ -21,7 +21,7 @@ A command‐line tool (Python‐based) that allows bulk editing of Rockwell Fact
   - [Debug Mode](#debug-mode)
   - [Flow Chart](#flow-chart)
   - [Example Excel Output](#example-excel-output)
-    - [Example XML Schema Snippet](#example-xml-schema-snippet)
+  - [Example XML Schema Snippet](#example-xml-schema-snippet)
   - [Preservation Rules \& Edge Cases](#preservation-rules--edge-cases)
   - [Troubleshooting](#troubleshooting)
 
@@ -30,297 +30,186 @@ A command‐line tool (Python‐based) that allows bulk editing of Rockwell Fact
 ## Features
 
 1. **Bulk Editing in Excel**  
-   - Extract top‐level parameters (`<Parameter>`) and step‐level formulas (`<FormulaValue>`) into a spreadsheet.
-   - One sheet per XML file, for easy batch editing.
+   - Extract top-level `<Parameter>` and step-level `<FormulaValue>` into one sheet per file.  
+   - Edit hundreds of tags in your favorite spreadsheet tool.  
 
-2. **Preservation of Order & Empty Tags**  
-   - Original ordering of parameters/formula values remains intact in the updated XML.
-   - Empty tags, such as `<EngineeringUnits/>` or `<String/>`, stay preserved.
-   - `<FormulaValueLimit>` blocks also remain unless you remove the entire node.
+2. **Preserve Order & Empties**  
+   - Maintains the original element order.  
+   - Keeps empty tags (e.g. `<EngineeringUnits/>`, `<String/>`).  
+   - Retains existing `<FormulaValueLimit>` blocks unless you remove them.  
 
-3. **Recursive Parsing of Child XML**  
-   - If a `.pxml` references child `.uxml` or `.oxml` (via `<StepRecipeID>`), we automatically include them in the Excel export.
+3. **Recursive Child Parsing**  
+   - A `.pxml` may reference `.uxml`; a `.uxml` may reference `.oxml` via `<StepRecipeID>`.  
+   - Exports all related files into one workbook.
 
-4. **Selective Create/Update/Remove**  
-   - Removing a row in Excel removes that node in XML.
-   - Adding a row with a new `FullPath` creates a new `<Parameter>` or `<FormulaValue>` in XML.
-   - Only sub‐elements that have non‐empty columns are created if missing; otherwise, if a column is empty for a sub‐element that didn’t originally exist, it’s not added.
+4. **Selective Create/Update/Delete**  
+   - **Update** if a row’s `FullPath` matches an existing node.  
+   - **Delete** if you remove a row entirely.  
+   - **Create** if you add a new `FullPath` row (with one valid data-type column).
 
 5. **Detailed Logging**  
-   - By default, logs to console at INFO level.
-   - With `--debug`, logs at DEBUG level go into `batch_bulk_editor.log`.
+   - INFO-level messages to console.  
+   - DEBUG-level (with `--debug`) to `batch_bulk_editor.log`.
 
 ---
 
 ## Requirements
 
-- **Python 3.7+** (tested with Python 3.12+)
-- **lxml** for XML parsing
-- **openpyxl** for reading/writing Excel
+- **Python 3.7+** (tested on 3.12)  
+- **lxml**  
+- **openpyxl**  
 
 ---
 
 ## Installation
 
-You have multiple options for installing dependencies and running the script:
-
 ### Using pip
 
-1. **Clone or Download** this repository, ensuring `main.py` is present.
-2. **Install** dependencies with `pip`:
-   ```bash
-   pip install lxml openpyxl
-   ```
-3. **Run** using Python:
-   ```bash
-   python main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
-   ```
-
-### Using a Python Virtual Environment
-
-1. **Create** a virtual environment:
-   ```bash
-   python -m venv venv
-   ```
-2. **Activate** the venv:
-   - On Windows:
-     ```bash
-     venv\Scripts\activate
-     ```
-   - On macOS/Linux:
-     ```bash
-     source venv/bin/activate
-     ```
-3. **Install** packages:
-   ```bash
-   pip install lxml openpyxl
-   ```
-4. **Run** the tool:
-   ```bash
-   python main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
-   ```
-
-### Using uv as the Package Manager
-
-If you prefer to manage dependencies via [uv](https://astral.sh/blog/uv) and have a `pyproject.toml` included in this repo:
-
-1. **Initialize** uv in your project directory (if you haven’t already):  
-   ```bash
-   uv init
-   ```
-   *(This creates a local `.venv` and references your `pyproject.toml`.)*
-2. **Install** dependencies from `pyproject.toml`:
-   ```bash
-   uv install
-   ```
-3. **Run** the tool via uv’s environment:
-   ```bash
-   uv run python app/main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
-   ```
-
-*(Behind the scenes, `uv` will create and manage a virtual environment and install packages listed in your `pyproject.toml`.)*
-
-Here’s a revised **Installation** section that adds a **“Using the Makefile”** option—so folks can simply run one or two `make` commands instead of typing everything manually:
-
-````markdown
-## Installation
-
-You have multiple options for installing dependencies and running the script:
-
-### Using pip
-
-1. **Clone** this repository, ensuring `batch_bulk_editor.py` (or `main.py`) is present.  
+1. **Clone** this repo.  
 2. **Install** dependencies:
+
    ```bash
    pip install lxml openpyxl
-````
+   ```
 
-3. **Run** the tool:
+3. **Run**:
 
    ```bash
-   python batch_bulk_editor.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
+   python main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
    ```
 
 ### Using a Python Virtual Environment
 
-1. **Create** a venv:
-
-   ```bash
+1. ```bash
    python -m venv venv
    ```
-2. **Activate** it:
+2. Activate it:
 
-   * **Windows**: `venv\Scripts\activate`
-   * **macOS/Linux**: `source venv/bin/activate`
-3. **Install** packages:
+   * Windows: `venv\Scripts\activate`
+   * macOS/Linux: `source venv/bin/activate`
+3. Install:
 
    ```bash
    pip install lxml openpyxl
    ```
-4. **Run**:
+4. Run:
 
    ```bash
-   python batch_bulk_editor.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
+   python main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
    ```
 
 ### Using uv as the Package Manager
 
-If you manage dependencies via [uv](https://astral.sh/blog/uv) (with your `pyproject.toml` already set up):
+If you’ve defined your dependencies in `pyproject.toml`:
 
-1. **Initialize** and install:
-
-   ```bash
-   uv init
-   uv install
-   ```
-2. **Run** in uv’s venv:
-
-   ```bash
-   uv run python batch_bulk_editor.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
-   ```
+```bash
+uv init
+uv install
+uv run python main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
+```
 
 ### Using the Makefile (Recommended)
 
-We provide a Makefile that automates every step—no manual activation or long commands required:
+We provide a Makefile to automate all steps:
 
 ```bash
-# 1) Install/prepare everything:
-make all
-
-# or step by step:
-make check-uv        # ensure uv is installed
-make install         # uv init & uv sync (installs deps)
-make meta            # print name/version/description
-make version         # generate version_info.txt
-make build           # bundle source for Windows build
-make clean           # remove build artifacts
+make help       # list targets
+make test       # runs pytests
+make all        # check-uv → install → meta → version → build → clean
+make install    # uv init + uv sync
+make meta       # print name/version/description
+make version    # generate Windows version_info.txt
+make build      # bundle source for Windows
+make clean      # remove build artifacts
 ```
-
-* **`make all`** runs **check-uv**, **install**, **meta**, **version**, **build**, then **clean**.
 
 ---
 
 ## Usage Overview
 
-The script `main.py` offers two sub‐commands:
-
 ### Export XML to Excel (`xml2excel`)
 
 ```bash
-python main.py xml2excel --xml PATH_TO_XML --excel OUTPUT_EXCEL [--debug]
+python main.py xml2excel --xml PATH_TO_XML --excel OUTPUT_XLSX [--debug]
 ```
 
-| Argument         | Description                                                                                           |
-|------------------|-------------------------------------------------------------------------------------------------------|
-| `--xml`          | Path to the “parent” file (e.g. `.pxml`, `.uxml`, or `.oxml`). The tool recursively loads child files by referencing `<StepRecipeID>`. |
-| `--excel`        | Path to the output Excel workbook.                                                                    |
-| `--debug`        | (Optional) Writes debug logs to `batch_bulk_editor.log` and prints info logs to console.              |
+| Argument  | Description                                                                       |
+| --------- | --------------------------------------------------------------------------------- |
+| `--xml`   | Parent file (`.pxml`, `.uxml`, or `.oxml`). Children loaded via `<StepRecipeID>`. |
+| `--excel` | Destination Excel workbook.                                                       |
+| `--debug` | Write DEBUG logs to `batch_bulk_editor.log`.                                      |
 
 ### Import Excel to XML (`excel2xml`)
 
 ```bash
-python main.py excel2xml --xml PATH_TO_XML --excel EDITED_EXCEL [--debug]
+python main.py excel2xml --xml PATH_TO_XML --excel EDITED_XLSX [--debug]
 ```
 
-| Argument         | Description                                                                                            |
-|------------------|--------------------------------------------------------------------------------------------------------|
-| `--xml`          | Path to the same parent file used in `xml2excel`.                                                     |
-| `--excel`        | Path to the Excel workbook that was edited.                                                           |
-| `--debug`        | (Optional) Writes debug logs to `batch_bulk_editor.log` and prints info logs to console.              |
+| Argument  | Description                                  |
+| --------- | -------------------------------------------- |
+| `--xml`   | Same parent file used for export.            |
+| `--excel` | Edited Excel workbook.                       |
+| `--debug` | Write DEBUG logs to `batch_bulk_editor.log`. |
 
 ---
 
 ## Debug Mode
 
-Add `--debug` **before** the sub‐command to enable verbose logs:
+Add `--debug` before the subcommand to capture detailed logs:
 
 ```bash
 python main.py --debug xml2excel --xml myRecipe.pxml --excel out.xlsx
 ```
 
-- Creates or appends to `batch_bulk_editor.log` with detailed debug info.
-- Console logs remain at INFO level.
+* Creates/appends `batch_bulk_editor.log` at DEBUG level.
+* Console remains at INFO level.
 
 ---
 
 ## Flow Chart
 
-Below is a Mermaid diagram illustrating the internal flow of each sub-command:
-
 ```mermaid
-flowchart TB
- subgraph XML2Excel["XML2Excel"]
-        A2{"Check if --xml file exists?"}
-        A1(("Start"))
-        A3(["Error & Exit"])
-        A4["Parse parent XML<br> + Recursively load children"]
-        A5["Extract parameters / formula values<br> into row dictionaries"]
-        A6["Create Excel workbook<br>One sheet per file"]
-        A7["Write each row as a line in Excel"]
-        A8(("Done: xml2excel"))
+flowchart LR
+  subgraph XML2Excel
+    A1([Start]) --> A2{XML exists?}
+    A2 -- No --> A3([Error & Exit])
+    A2 -- Yes --> A4[Parse parent & children]
+    A4 --> A5[Extract nodes → row dicts]
+    A5 --> A6[Write Excel workbook]
+    A6 --> A7([Done])
   end
- subgraph Excel2XML["Excel2XML"]
-        B2{"Check if --xml file exists?"}
-        B1(("Start"))
-        B3(["Error & Exit"])
-        B4["Load all original XML<br> + Build mapping FullPath -&gt; node"]
-        B5["Read Excel, gather rows by FullPath"]
-        B6["Compare Excel rows vs. existing nodes"]
-        B7{"Row missing <br> vs. row new <br> vs. row changed?"}
-        B8["Remove node"]
-        B9["Create node in correct place"]
-        B10["Update node partial approach"]
-        B11["Write updated XML into<br> new timestamped directory"]
-        B12(("Done: excel2xml"))
+
+  subgraph Excel2XML
+    B1([Start]) --> B2{XML exists?}
+    B2 -- No --> B3([Error & Exit])
+    B2 -- Yes --> B4[Load original XML → RecipeTree]
+    B4 --> B5[Read Excel rows]
+    B5 --> B6{"Row = existing/new/missing?"}
+    B6 -- existing --> B7[update node]
+    B6 -- new      --> B8[create node]
+    B6 -- missing  --> B9[delete node]
+    B7 --> B10[Reorder & write XML]
+    B8 --> B10
+    B9 --> B10
+    B10 --> B11([Done])
   end
-    A1 --> A2
-    A2 -- No --> A3
-    A2 -- Yes --> A4
-    A4 --> A5
-    A5 --> A6
-    A6 --> A7
-    A7 --> A8
-    B1 --> B2
-    B2 -- No --> B3
-    B2 -- Yes --> B4
-    B4 --> B5
-    B5 --> B6
-    B6 --> B7
-    B7 -- Missing --> B8
-    B7 -- New --> B9
-    B7 -- Changed --> B10
-    B10 --> B11
-    B9 --> B11
-    B8 --> B11
-    B11 --> B12
-    XML2Excel --> Excel2XML
+
+  XML2Excel -.-> Excel2XML
 ```
 
 ---
 
 ## Example Excel Output
 
-Below is a **simplified** example of a sheet from the Excel file generated by `xml2excel`. Each row corresponds to one `<Parameter>` or `<FormulaValue>`, with columns reflecting sub‐elements (e.g. `String`, `Defer`, or `FormulaValueLimit_Verification`).
-
-| FullPath                                                            | TagType       | Name                  | String | Defer                | Real | FormulaValueLimit_Verification | FormulaValueLimit_LowValue |
-|---------------------------------------------------------------------|---------------|-----------------------|--------|----------------------|------|--------------------------------|----------------------------|
-| OP_LNP_SETUP/Parameter[AQREL_DEVICE_SETUP]                          | Parameter     | AQREL_DEVICE_SETUP    |        |                      |      |                                |                            |
-| OP_LNP_SETUP/Parameter[AQREL_TARE_ZERO_TMOUT]                       | Parameter     | AQREL_TARE_ZERO_TMOUT |        |                      |      |                                |                            |
-| OP_LNP_SETUP/Steps/Step[ACQ_REL:1]/FormulaValue[X_R_TARE_ZERO_TIME_OUT_SEC] | FormulaValue | X_R_TARE_ZERO_TIME_OUT_SEC |        | AQREL_TARE_ZERO_TMOUT | 0.0  | No_Limits                      | 0.0                        |
-
-**Notes**:
-
-- **`FullPath`** uniquely identifies where the parameter/formula lives in the S88 hierarchy.  
-- **`TagType`** is either `Parameter` or `FormulaValue`.  
-- **`FormulaValueLimit_*`** columns store `<FormulaValueLimit>` data.  
-
-When you edit this Excel and re‐import with `excel2xml`, the script updates your XML accordingly.
+| FullPath                                                             | TagType      | Name                     | Real | Integer | String | EnumerationSet   | EnumerationMember | Defer            | FormulaValueLimit\_Verification | … |
+| -------------------------------------------------------------------- | ------------ | ------------------------ | ---- | ------- | ------ | ---------------- | ----------------- | ---------------- | ------------------------------- | - |
+| TEST/Parameter\[XFER5\_TARGET\_CONC\_DB]                             | Parameter    | XFER5\_TARGET\_CONC\_DB  | 0    |         |        |                  |                   |                  |                                 |   |
+| TEST/Steps/Step\[ACQ\_REL:1]/FormulaValue\[X\_R\_END\_PHASE\_PROMPT] | FormulaValue | X\_R\_END\_PHASE\_PROMPT |      |         |        | N\_DISABLEENABLE | DISABLE           |                  | No\_Limits                      |   |
+| TEST/Steps/Step\[ACQ\_REL:1]/FormulaValue\[X\_R\_END\_TYPE]          | FormulaValue | X\_R\_END\_TYPE          |      |         |        | N\_ENDTYPE       |                   | AQREL\_END\_TYPE | No\_Limits                      |   |
 
 ---
 
-### Example XML Schema Snippet
-
-A snippet from a typical FactoryTalk Batch–style XSD, showing `<Parameter>` and `<FormulaValue>` structures:
+## Example XML Schema Snippet
 
 ```xml
 <xs:element name="Parameter">
@@ -344,7 +233,6 @@ A snippet from a typical FactoryTalk Batch–style XSD, showing `<Parameter>` an
       <xs:element name="Name" type="xs:string" minOccurs="0"/>
       <xs:element name="Display" type="xs:boolean" minOccurs="0"/>
       <xs:element name="Value" minOccurs="0"/>
-      <xs:element name="String" type="xs:string" minOccurs="0"/>
       <xs:element name="Defer" type="xs:string" minOccurs="0"/>
       <xs:element name="Real" type="xs:decimal" minOccurs="0"/>
       <xs:element name="EngineeringUnits" type="xs:string" minOccurs="0"/>
@@ -354,7 +242,6 @@ A snippet from a typical FactoryTalk Batch–style XSD, showing `<Parameter>` an
           <xs:sequence>
             <xs:element name="LowValue" type="xs:decimal" minOccurs="0"/>
             <xs:element name="HighValue" type="xs:decimal" minOccurs="0"/>
-            <!-- etc. -->
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -367,18 +254,21 @@ A snippet from a typical FactoryTalk Batch–style XSD, showing `<Parameter>` an
 
 ## Preservation Rules & Edge Cases
 
-- **Empty tags** remain if they existed before. If a column is blank in Excel but the node already existed, we preserve the old value. Removing the entire row in Excel removes the node from XML.  
-- **`<FormulaValueLimit>`** is only created if you provide non‐blank `FormulaValueLimit_*` columns in Excel or if it already existed.  
-- **New parameters** can be created by adding a new `FullPath` row in Excel. If you fill out sub‐element columns, that new `<Parameter>` or `<FormulaValue>` is inserted into the XML.  
-- **Removing a sub‐element** is generally done by removing the entire row. If you need more granular removal logic, you can customize the script.
+* **Empty Tags**: If a sub-element existed (even empty), it remains.
+* **Create FormulaValueLimit** only if `FormulaValueLimit_*` columns are non-blank or it existed originally.
+* **Type Enforcement**: Exactly one of Real, Integer, String, or EnumerationSet per row.
+* **Defer Validation**: A `<FormulaValue>`’s `Defer` must match a parameter name in the same sheet.
 
 ---
 
 ## Troubleshooting
 
-1. **“No Sheet Found”**  
-   - If you rename the sheet to something else (not matching the original file base name), it won’t be updated.  
-2. **“File Not Found”**  
-   - Ensure `--xml` is correct and that your `.pxml`/`.uxml`/`.oxml` file exists.  
-3. **Need More Verbose Logs?**  
-   - Use `--debug` to produce a debug file (`batch_bulk_editor.log`) with all details.
+1. **No Sheet Found**
+
+   * Sheet name must match the XML filename (`TEST.pxml` → sheet “TEST.pxml”).
+2. **Missing Data-Type**
+
+   * Every Parameter or FormulaValue row must have one and only one data-type column.
+3. **Need More Logs?**
+
+   * Add `--debug` to capture detailed steps in `batch_bulk_editor.log`.

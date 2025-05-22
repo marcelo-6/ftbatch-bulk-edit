@@ -96,6 +96,25 @@ def sample_pxml(tmp_path):
 
 
 def test_full_xml2excel_flow(sample_pxml, tmp_path):
+    """
+    End-to-end xml2excel workflow test.
+
+    This test verifies that a FactoryTalk Batch `.pxml` file containing
+    multiple `<Parameter>` and `<FormulaValue>` nodes is correctly parsed
+    into the in-memory model and then exported to an Excel workbook.
+
+    First, it uses XMLParser to load and extract the expected number of
+    parameters and formula values from the sample XML.  Next, it calls
+    ExcelExporter to write these nodes into an `.xlsx` file and reloads
+    the workbook to assert that the correct sheet name and header row
+    (matching `EXCEL_COLUMNS`) are present.  The test then reads all
+    data rows and ensures their count equals the total nodes extracted.
+
+    Finally, it spot-checks specific rows—verifying enumeration values
+    and deferred references—confirming that each node's Excel representation
+    matches the original XML content.  Any mismatch causes the test to fail,
+    guaranteeing that the xml2excel path is reliable and schema-complete.
+    """
     # 1) Parse XML (including any children, none here)
     parser = XMLParser()
     trees = parser.parse(sample_pxml)

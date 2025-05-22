@@ -67,6 +67,26 @@ def sample_pxml(tmp_path):
 
 
 def test_excel2xml_full_flow(sample_pxml, tmp_path):
+    """
+    End-to-end excel2xml workflow test.
+
+    This test exercises the full round-trip: exporting XML to Excel,
+    programmatically modifying the spreadsheet, and re-importing back
+    into updated XML files.
+
+    It starts by exporting a sample `.pxml` to Excel, then alters the
+    workbook by updating one parameter's value, deleting another row,
+    and appending a new parameter with a valid data type.  After saving
+    these changes, it invokes ExcelImporter to apply create/update/delete
+    operations to the in-memory RecipeTree, capturing statistics of how
+    many nodes were created, updated, or removed.
+
+    Finally, XMLWriter serializes the modified trees into a timestamped
+    output directory, and the test parses the resulting XML to assert that
+    the update took effect (new value), the deletion occurred, and the new
+    parameter exists.  This comprehensive test ensures the excel2xml path
+    maintains XML integrity and fully honors user edits.
+    """
     # 1) xml2excel
     parser = XMLParser()
     trees = parser.parse(sample_pxml)

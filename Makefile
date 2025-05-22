@@ -17,6 +17,7 @@ help:
 	@echo ""
 	@echo "Available targets:"
 	@echo "  help               Show this help message"
+	@echo "  test               Runs pytests to confirm changes to code have basic regression testing"
 	@echo "  all                Runs all in the following order check-uv install meta version build clean"
 	@echo "  check-uv           Ensure 'uv' is installed (via pip if needed)"
 	@echo "  install            Initialize uv and install project dependencies"
