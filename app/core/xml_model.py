@@ -11,6 +11,7 @@ from lxml import etree
 from lxml.etree import QName
 from core.base import NAMESPACE, NSMAP, EXCEL_COLUMNS
 from utils.errors import ValidationError, TypeConflictError, DeferResolutionError
+from utils.string import safe_strip
 
 
 class NodeBase:
@@ -60,7 +61,7 @@ class ParameterNode(NodeBase):
         for k, v in self.original_subs.items():
             if k not in row:
                 row[k] = v
-        self.log.debug(f"{row}")
+        # self.log.debug(f"{row}") # Too much logging for now
         return row
 
     def update_from_dict(self, row: dict):
@@ -80,21 +81,23 @@ class ParameterNode(NodeBase):
         count = sum(bool(row[f].strip()) for f in type_fields)
         if count > 2:
             raise TypeConflictError(f"{self.fullpath}: must have exactly one data type")
-        self.log.debug(f"\t\tParsing excel row...")
-        for k, new_val in row.items():
-            if k in ("TagType", "FullPath", "Defer") or k.startswith(
-                "FormulaValueLimit_"
-            ):
-                continue
-            self.log.debug(f"\t\t{k}={new_val}")
-            text = new_val.strip()
-            if not text and k not in self.original_subs:
-                continue
-            el = self.element.find(f"{{{NAMESPACE}}}{k}", namespaces=NSMAP)
-            if el is None:
-                el = etree.SubElement(self.element, f"{{{NAMESPACE}}}{k}")
-            el.text = text
-        self.reorder_children()
+        try:
+            for k, new_val in row.items():
+                if k in ("TagType", "FullPath", "Defer") or k.startswith(
+                    "FormulaValueLimit_"
+                ):
+                    continue
+                text = safe_strip(new_val)
+                if not text and k not in self.original_subs:
+                    continue
+                el = self.element.find(f"{{{NAMESPACE}}}{k}", namespaces=NSMAP)
+                if el is None:
+                    el = etree.SubElement(self.element, f"{{{NAMESPACE}}}{k}")
+                el.text = text
+            self.reorder_children()
+        except Exception as e:
+            self.log.debug(f"\t\t Failed on Row:{row}")
+            raise e
 
     def reorder_children(self):
         children = {QName(c.tag).localname: c for c in self.element}
@@ -167,7 +170,7 @@ class FormulaValueNode(NodeBase):
         for k, v in self.original_subs.items():
             if k not in row:
                 row[k] = v
-        self.log.debug(f"{row}")
+        # self.log.debug(f"{row}") # Too much logging for now
         return row
 
     def update_from_dict(self, row: dict):
@@ -189,22 +192,26 @@ class FormulaValueNode(NodeBase):
         count = sum(bool(row[f].strip()) for f in type_fields)
         if count > 2:
             raise TypeConflictError(f"{self.fullpath}: must have exactly one data type")
-        for k, new_val in row.items():
-            if k.startswith("FormulaValueLimit_") or k in ("TagType", "FullPath"):
-                continue
-            text = new_val.strip()
-            if k == "Value" and row.get("Defer", "").strip():
-                continue
-            if k == "Defer" and not text:
-                continue
-            if not text and k not in self.original_subs:
-                continue
-            el = self.element.find(f"{{{NAMESPACE}}}{k}", namespaces=NSMAP)
-            if el is None:
-                el = etree.SubElement(self.element, f"{{{NAMESPACE}}}{k}")
-            el.text = text
+        try:
+            for k, new_val in row.items():
+                if k.startswith("FormulaValueLimit_") or k in ("TagType", "FullPath"):
+                    continue
+                text = safe_strip(new_val)
+                if k == "Value" and row.get("Defer", "").strip():
+                    continue
+                if k == "Defer" and not text:
+                    continue
+                if not text and k not in self.original_subs:
+                    continue
+                el = self.element.find(f"{{{NAMESPACE}}}{k}", namespaces=NSMAP)
+                if el is None:
+                    el = etree.SubElement(self.element, f"{{{NAMESPACE}}}{k}")
+                el.text = text
 
-        self.reorder_children()
+            self.reorder_children()
+        except Exception as e:
+            self.log.debug(f"\t\t Failed on Row:{row}")
+            raise e
 
     def reorder_children(self):
         """
@@ -263,7 +270,7 @@ class RecipeTree:
         for p in self.root.findall(f"{{{NAMESPACE}}}Parameter", namespaces=NSMAP):
             name = p.find(f"{{{NAMESPACE}}}Name", namespaces=NSMAP).text or ""
             fp = f"{rid}/Parameter[{name}]"
-            self.log.debug(f"\t\tFound {fp}")
+            # self.log.debug(f"\t\tFound {fp}") # Too much logging for now
             self.parameters.append(ParameterNode(p, fp, self.filepath))
         for fv in self.root.findall(
             f".//{{{NAMESPACE}}}FormulaValue", namespaces=NSMAP
@@ -272,7 +279,7 @@ class RecipeTree:
             step_name = step.find(f"{{{NAMESPACE}}}Name", namespaces=NSMAP).text or ""
             name = fv.find(f"{{{NAMESPACE}}}Name", namespaces=NSMAP).text or ""
             fp = f"{rid}/Steps/Step[{step_name}]/FormulaValue[{name}]"
-            self.log.debug(f"\t\tFound {fp}")
+            # self.log.debug(f"\t\tFound {fp}") # Too much logging for now
             self.formula_values.append(FormulaValueNode(fv, fp, self.filepath))
 
     def find_parameter(self, fullpath: str):
