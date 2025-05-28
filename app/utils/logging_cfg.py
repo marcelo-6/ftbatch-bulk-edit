@@ -27,7 +27,7 @@ def configure_logging(debug_mode: bool) -> None:
         fh = logging.handlers.RotatingFileHandler(
             "batch_bulk_editor.log",
             mode="a",
-            maxBytes=20e6,
+            maxBytes=10e6,
             backupCount=10,
             encoding="utf-8",
         )

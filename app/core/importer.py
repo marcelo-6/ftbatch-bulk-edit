@@ -90,13 +90,13 @@ class ExcelImporter:
                     if node:
                         node.update_from_dict(row_dict)
                         log.debug(
-                            f"\tParameter found in XML, updating data to: {row_dict=}"
+                            f"\tParameter found in XML (updating)"  # updating data to: {row_dict=}"
                         )
                         stats["updated"] += 1
                     else:
                         tree.create_parameter(row_dict)
                         log.debug(
-                            f"\tParameter NOT found in XML, creating parameter with: {row_dict=}"
+                            f"\tParameter NOT found in XML (creating)"  # creating parameter with: {row_dict=}"
                         )
                         stats["created"] += 1
                     seen_params.add(fp)
@@ -117,13 +117,13 @@ class ExcelImporter:
                     if node:
                         node.update_from_dict(row_dict)
                         log.debug(
-                            f"\tFormulaValue found in XML, updating data to: {row_dict=}"
+                            f"\tFormulaValue found in XML (updating)"  # , updating data to: {row_dict=}"
                         )
                         stats["updated"] += 1
                     else:
                         tree.create_formulavalue(row_dict)
                         log.debug(
-                            f"\tFormulaValue NOT found in XML, creating with: {row_dict=}"
+                            f"\tFormulaValue NOT found in XML (creating)"  # , creating with: {row_dict=}"
                         )
                         stats["created"] += 1
                     seen_fvs.add(fp)
