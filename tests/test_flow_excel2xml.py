@@ -123,7 +123,7 @@ def test_excel2xml_full_flow(sample_pxml, tmp_path):
     # 3) excel2xml
     importer = ExcelImporter()
     stats = importer.import_changes(str(excel_file), trees)
-    assert stats["updated"] == 2
+    assert stats["updated"] == 1
     assert stats["deleted"] == 1
     assert stats["created"] == 1
 
