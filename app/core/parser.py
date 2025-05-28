@@ -37,7 +37,7 @@ class XMLParser:
             loaded[path] = tree
 
             log.info(
-                f"Loaded {os.path.basename(path)}: {len(tree.parameters)} params, {len(tree.formula_values)} formula values, Total = {len(tree.parameters) + len(tree.formula_values)}"
+                f"\tLoaded {os.path.basename(path)}: {len(tree.parameters)} params, {len(tree.formula_values)} formula values, Total = {len(tree.parameters) + len(tree.formula_values)}"
             )
             # determine child extension
             ext = os.path.splitext(path)[1].upper()

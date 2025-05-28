@@ -88,11 +88,15 @@ class ExcelImporter:
                     node = tree.find_parameter(fp)
                     log.debug(f"\tWorking on Parameter: {row_dict["Name"].strip()}")
                     if node:
-                        node.update_from_dict(row_dict)
-                        log.debug(
-                            f"\tParameter found in XML (updating)"  # updating data to: {row_dict=}"
-                        )
-                        stats["updated"] += 1
+                        if node.update_from_dict(row_dict):
+                            log.debug(
+                                f"\tParameter found in XML (updating)"  # updating data to: {row_dict=}"
+                            )
+                            stats["updated"] += 1
+                        else:
+                            log.debug(
+                                f"\tParameter found in XML (no changes found)"  # updating data to: {row_dict=}"
+                            )
                     else:
                         tree.create_parameter(row_dict)
                         log.debug(
@@ -115,11 +119,15 @@ class ExcelImporter:
                         )
                         continue
                     if node:
-                        node.update_from_dict(row_dict)
-                        log.debug(
-                            f"\tFormulaValue found in XML (updating)"  # , updating data to: {row_dict=}"
-                        )
-                        stats["updated"] += 1
+                        if node.update_from_dict(row_dict):
+                            log.debug(
+                                f"\tFormulaValue found in XML (updating)"  # , updating data to: {row_dict=}"
+                            )
+                            stats["updated"] += 1
+                        else:
+                            log.debug(
+                                f"\tFormulaValue found in XML (no change)"  # , updating data to: {row_dict=}"
+                            )
                     else:
                         tree.create_formulavalue(row_dict)
                         log.debug(

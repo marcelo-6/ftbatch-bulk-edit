@@ -64,9 +64,14 @@ class ParameterNode(NodeBase):
         # self.log.debug(f"{row}") # Too much logging for now
         return row
 
-    def update_from_dict(self, row: dict):
+    def update_from_dict(self, row: dict) -> bool:
         """
         Apply updates to this <Parameter> element based on a single Excel row.
+
+        Returns:
+            bool:
+            - True if at least one XML text value was changed (or a new element created),
+            - False if everything was identical and no modification was made.
 
         First, it validates that the row has exactly one data-type column (Real, Integer, String,
         or EnumerationSet), raising `TypeConflictError` otherwise.  Then, for each field in the row,
@@ -77,24 +82,38 @@ class ParameterNode(NodeBase):
         encapsulates all in-memory changes to the original XML tree.
         """
 
+        changed = False
+
+        # Validate exactly one data-type
         type_fields = ["Real", "Integer", "String", "EnumerationSet"]
         count = sum(bool(row[f].strip()) for f in type_fields)
         if count > 2:
             raise TypeConflictError(f"{self.fullpath}: must have exactly one data type")
         try:
+            # Loop through each field and create/update as needed
             for k, new_val in row.items():
                 if k in ("TagType", "FullPath", "Defer") or k.startswith(
                     "FormulaValueLimit_"
                 ):
                     continue
                 text = safe_strip(new_val)
+
+                # skip blanks that didn’t originally exist
                 if not text and k not in self.original_subs:
                     continue
                 el = self.element.find(f"{{{NAMESPACE}}}{k}", namespaces=NSMAP)
                 if el is None:
                     el = etree.SubElement(self.element, f"{{{NAMESPACE}}}{k}")
-                el.text = text
-            self.reorder_children()
+                    el.text = text
+                    changed = True
+                else:
+                    old = safe_strip(el.text)
+                    if text != old:
+                        el.text = text
+                        changed = True
+            if changed:
+                self.reorder_children()
+            return changed
         except Exception as e:
             self.log.debug(f"\t\t Failed on Row:{row}")
             raise e
@@ -173,9 +192,14 @@ class FormulaValueNode(NodeBase):
         # self.log.debug(f"{row}") # Too much logging for now
         return row
 
-    def update_from_dict(self, row: dict):
+    def update_from_dict(self, row: dict) -> bool:
         """
         Apply updates to this <FormulaValue> element based on a single Excel row.
+
+        Returns:
+            bool:
+            - True if at least one XML text value was changed (or a new element created),
+            - False if everything was identical and no modification was made.
 
         It first validates that exactly one of Real, Integer, String, or EnumerationSet is
         provided, raising `TypeConflictError` if not.  It then processes each field, skipping any
@@ -187,6 +211,7 @@ class FormulaValueNode(NodeBase):
         deterministic ordering.  Any failure to find a referenced Step or attribute raises
         `ValidationError` or `DeferResolutionError`.
         """
+        changed = False
 
         type_fields = ["Real", "Integer", "String", "EnumerationSet", "Defer"]
         count = sum(bool(row[f].strip()) for f in type_fields)
@@ -197,18 +222,28 @@ class FormulaValueNode(NodeBase):
                 if k.startswith("FormulaValueLimit_") or k in ("TagType", "FullPath"):
                     continue
                 text = safe_strip(new_val)
+                #  skip Value if Defer set, skip Defer if blank
                 if k == "Value" and row.get("Defer", "").strip():
                     continue
                 if k == "Defer" and not text:
                     continue
+
+                # skip blanks that didn’t originally exist
                 if not text and k not in self.original_subs:
                     continue
                 el = self.element.find(f"{{{NAMESPACE}}}{k}", namespaces=NSMAP)
                 if el is None:
                     el = etree.SubElement(self.element, f"{{{NAMESPACE}}}{k}")
-                el.text = text
-
-            self.reorder_children()
+                    el.text = text
+                    changed = True
+                else:
+                    old = safe_strip(el.text)
+                    if text != old:
+                        el.text = text
+                        changed = True
+            if changed:
+                self.reorder_children()
+            return changed
         except Exception as e:
             self.log.debug(f"\t\t Failed on Row:{row}")
             raise e
