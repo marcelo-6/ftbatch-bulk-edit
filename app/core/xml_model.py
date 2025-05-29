@@ -194,10 +194,16 @@ class FormulaValueNode(NodeBase):
         else:
             # standard case: just emit the raw values
             row["ParamExpression"] = ""
-            for t in ("Real", "Integer", "String", "EnumerationSet"):
+            for t in (
+                "Real",
+                "Integer",
+                "String",
+                "EnumerationSet",
+                "EnumerationMember",
+            ):
                 row[t] = self.original_subs.get(t, "")
-        for col in ("Real", "Integer", "String", "EnumerationSet", "EnumerationMember"):
-            row[col] = self.original_subs.get(col, "")
+        # for col in ("Real", "Integer", "String", "EnumerationSet", "EnumerationMember"):
+        #     row[col] = self.original_subs.get(col, "")
         fvl = self.element.find(f"{{{NAMESPACE}}}FormulaValueLimit", namespaces=NSMAP)
         if fvl is not None:
             row["FormulaValueLimit_Verification"] = fvl.get("Verification", "")
