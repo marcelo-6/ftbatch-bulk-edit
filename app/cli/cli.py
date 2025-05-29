@@ -52,8 +52,8 @@ def main():
             ExcelExporter().export(tree, args.excel)
         elif args.cmd == "excel2xml":
             tree = XMLParser().parse(args.xml)
-            stats = ExcelImporter().import_changes(args.excel, tree)
-            logger.info(f"{stats=}")
+            logger.info("--------- Changes made by excel2xml ----------")
+            ExcelImporter().import_changes(args.excel, tree)
             out_dir = XMLWriter().write(tree)
             logger.info(f"Wrote updated XML files to {out_dir}")
         else:
