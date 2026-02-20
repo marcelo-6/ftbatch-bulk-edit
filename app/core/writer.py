@@ -4,7 +4,6 @@ XMLWriter: serialize updated RecipeTree models back to XML files.
 
 import os
 from datetime import datetime
-from core.base import NSMAP
 
 
 class XMLWriter:

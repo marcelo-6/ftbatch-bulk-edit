@@ -1,13 +1,11 @@
 # tests/test_flow_xml2excel.py
 
-import os
 import pytest
-from lxml import etree
 from openpyxl import load_workbook
 
 from core.parser import XMLParser
 from core.exporter import ExcelExporter
-from core.base import NAMESPACE, NSMAP, EXCEL_COLUMNS
+from core.base import NAMESPACE, EXCEL_COLUMNS
 
 SAMPLE_FULL_XML = f"""<?xml version="1.0" encoding="UTF-8"?>
 <RecipeElement xmlns="{NAMESPACE}">

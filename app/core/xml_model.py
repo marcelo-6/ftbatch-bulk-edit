@@ -4,13 +4,12 @@
 XML model: RecipeTree, ParameterNode, FormulaValueNode.
 """
 
-import os
 import re
 import logging
 from lxml import etree
 from lxml.etree import QName
 from core.base import NAMESPACE, NSMAP, EXCEL_COLUMNS
-from utils.errors import ValidationError, TypeConflictError, DeferResolutionError
+from utils.errors import ValidationError, TypeConflictError
 from utils.string import safe_strip
 
 
@@ -431,7 +430,7 @@ class RecipeTree:
 
         # 3) Wrap in our Node class, apply data, track it
         node = ParameterNode(new_el, row["FullPath"], self.filepath)
-        changed = node.update_from_dict(row)  # always True on new
+        _ = node.update_from_dict(row)  # always True on new
         self.parameters.append(node)
         return node
 

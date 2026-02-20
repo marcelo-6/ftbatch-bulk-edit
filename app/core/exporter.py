@@ -2,7 +2,8 @@
 ExcelExporter: export RecipeTree instances to an .xlsx workbook.
 """
 
-import os, logging
+import os
+import logging
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 from core.base import EXCEL_COLUMNS

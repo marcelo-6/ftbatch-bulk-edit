@@ -62,7 +62,7 @@ def main():
         logger.error(f"Validation error: Aborted due to {e}")
         sys.exit(1)
     except Exception as e:
-        logger.exception("Unexpected error :(")
+        logger.exception(f"Unexpected error {e}")
         sys.exit(1)
 
 

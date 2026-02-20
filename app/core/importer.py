@@ -4,13 +4,10 @@ ExcelImporter: apply changes from an Excel workbook into RecipeTree models.
 
 import os
 import logging
-import re
 from collections import defaultdict
 from openpyxl import load_workbook
 from utils.string import safe_strip
-from core.base import EXCEL_COLUMNS, NAMESPACE, NSMAP
 from utils.errors import ValidationError
-from core.xml_model import RecipeTree, ParameterNode, FormulaValueNode
 
 
 class ExcelImporter:
@@ -40,7 +37,7 @@ class ExcelImporter:
             ValidationError: Aggregated validation errors found in Excel rows.
         """
         log = logging.getLogger(__name__)
-        debug_enabled = log.isEnabledFor(logging.DEBUG)
+        debug_enabled = log.isEnabledFor(logging.DEBUG)  # noqa: F841
 
         wb = load_workbook(excel_path)
         errors = []
@@ -110,18 +107,18 @@ class ExcelImporter:
                     if node:
                         if node.update_from_dict(row_dict):
                             log.debug(
-                                f"\tParameter found in XML (updating)"  # updating data to: {row_dict=}"
+                                "\tParameter found in XML (updating)"  # updating data to: {row_dict=}"
                             )
                             stats["Updated"] += 1
                             sheet_stats["Parameters"]["Updated"] += 1
                         else:
                             log.debug(
-                                f"\tParameter found in XML (no changes found)"  # updating data to: {row_dict=}"
+                                "\tParameter found in XML (no changes found)"  # updating data to: {row_dict=}"
                             )
                     else:
                         tree.create_parameter(row_dict)
                         log.debug(
-                            f"\tParameter NOT found in XML (creating)"  # creating parameter with: {row_dict=}"
+                            "\tParameter NOT found in XML (creating)"  # creating parameter with: {row_dict=}"
                         )
                         stats["Created"] += 1
                         sheet_stats["Parameters"]["Created"] += 1
@@ -147,7 +144,7 @@ class ExcelImporter:
                     if node:
                         if node.update_from_dict(row_dict):
                             log.debug(
-                                f"\tFormulaValue found in XML (updating)"  # , updating data to: {row_dict=}"
+                                "\tFormulaValue found in XML (updating)"  # , updating data to: {row_dict=}"
                             )
                             stats["Updated"] += 1
                             sheet_stats["FormulaValues"][step]["Updated"] += 1
@@ -155,12 +152,12 @@ class ExcelImporter:
                                 sheet_stats["FormulaValues"][step]["Deferrals"] += 1
                         else:
                             log.debug(
-                                f"\tFormulaValue found in XML (no change)"  # , updating data to: {row_dict=}"
+                                "\tFormulaValue found in XML (no change)"  # , updating data to: {row_dict=}"
                             )
                     else:
                         tree.create_formulavalue(row_dict)
                         log.debug(
-                            f"\tFormulaValue NOT found in XML (creating)"  # , creating with: {row_dict=}"
+                            "\tFormulaValue NOT found in XML (creating)"  # , creating with: {row_dict=}"
                         )
                         stats["Created"] += 1
                         sheet_stats["FormulaValues"][step]["Created"] += 1
