@@ -80,3 +80,22 @@ all: sync meta test build
 clean:
     rm -rf build dist __pycache__ .pytest_cache .mypy_cache .ruff_cache
     rm -f *.spec version_info.txt batch_bulk_editor.log
+
+doctor:
+	@echo "Checking local tools..."
+	@command -v just >/dev/null && echo "  just: ok" || echo "  just: missing"
+	@command -v git >/dev/null && echo "  git: ok" || echo "  git: missing"
+	@command -v cargo >/dev/null && echo "  cargo: ok" || echo "  cargo: missing"
+	@command -v git-cliff >/dev/null && echo "  git-cliff: ok" || echo "  git-cliff: missing (run: just install-git-cliff)"
+	@command -v yamllint -v >/dev/null && echo "  yamllint: ok" || echo "  yamllint: missing"
+	@command -v pre-commit -V >/dev/null && echo "  pre-commit: ok" || echo "  pre-commit: missing"
+	@command -v pre-commit install >/dev/null && echo "    all pre-commits: ok" || echo "  pre-commits: missing"
+
+changelog:
+	git cliff -o CHANGELOG.md
+
+changelog-unreleased:
+	git cliff --unreleased
+
+bump:
+	git cliff --bump --unreleased
