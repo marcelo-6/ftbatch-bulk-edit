@@ -5,17 +5,8 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import Any
 
-import tomllib
-
-
-def load_project_metadata(pyproject_path: Path) -> dict[str, Any]:
-    data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
-    project = data.get("project")
-    if not isinstance(project, dict):
-        raise ValueError(f"Missing [project] table in {pyproject_path}")
-    return project
+from versioning import load_project_metadata, resolve_current_version, resolve_next_version
 
 
 def main() -> int:
@@ -30,17 +21,32 @@ def main() -> int:
         choices=["name", "version", "description"],
         help="Print only one field value",
     )
+    parser.add_argument(
+        "--version-mode",
+        choices=["current", "next"],
+        default="current",
+        help="Version resolution mode when reading the version field",
+    )
     args = parser.parse_args()
 
-    metadata = load_project_metadata(Path(args.pyproject))
+    pyproject_path = Path(args.pyproject)
+    metadata = load_project_metadata(pyproject_path)
+    version = (
+        resolve_next_version(pyproject_path)
+        if args.version_mode == "next"
+        else resolve_current_version(pyproject_path)
+    )
 
     if args.field:
+        if args.field == "version":
+            print(version)
+            return 0
         value = metadata.get(args.field, "")
         print(value)
         return 0
 
     print(f"Name       : {metadata.get('name', '')}")
-    print(f"Version    : {metadata.get('version', '')}")
+    print(f"Version    : {version}")
     print(f"Description: {metadata.get('description', '')}")
     return 0
 

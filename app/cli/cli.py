@@ -5,6 +5,7 @@ Command-line interface for the Batch Bulk Editor.
 from __future__ import annotations
 
 import logging
+import subprocess
 import sys
 import tomllib
 from dataclasses import dataclass
@@ -46,7 +47,24 @@ def _project_version() -> str:
     try:
         return metadata.version("ftbatch-bulk-edit")
     except metadata.PackageNotFoundError:
-        pyproject_path = Path(__file__).resolve().parents[2] / "pyproject.toml"
+        repo_root = Path(__file__).resolve().parents[2]
+        version_script = repo_root / "scripts" / "versioning.py"
+        if version_script.exists():
+            try:
+                completed = subprocess.run(
+                    [sys.executable, str(version_script), "--mode", "current"],
+                    cwd=str(repo_root),
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+                resolved = completed.stdout.strip()
+                if resolved:
+                    return resolved
+            except (OSError, subprocess.CalledProcessError):
+                pass
+
+        pyproject_path = repo_root / "pyproject.toml"
         if pyproject_path.exists():
             project = tomllib.loads(pyproject_path.read_text(encoding="utf-8")).get(
                 "project", {}

@@ -19,6 +19,7 @@ A command-line tool (Python-based) that lets engineers bulk-edit Rockwell Factor
     - [Export XML to Excel (`xml2excel`)](#export-xml-to-excel-xml2excel)
     - [Import Excel to XML (`excel2xml`)](#import-excel-to-xml-excel2xml)
     - [Global Options](#global-options)
+  - [Changelog \& Versioning](#changelog--versioning)
   - [Debug Mode](#debug-mode)
   - [Flow Chart](#flow-chart)
   - [Example Excel Output](#example-excel-output)
@@ -125,6 +126,11 @@ just sync         # install deps for Python 3.14
 just test         # run tests
 just lint         # run Ruff lint checks
 just cov          # run tests with coverage threshold
+just bump-dry-run # print next semver from unreleased commits
+just changelog-unreleased # preview unreleased section
+just changelog-dry-run   # preview unreleased section with bumped version
+just release-dry-run     # show current/next version + release notes preview
+just changelog    # write full CHANGELOG.md from git tags
 just version-info # generate build/version_info.txt
 just build        # build one-file executable with PyInstaller
 just clean        # remove generated artifacts
@@ -165,6 +171,33 @@ python app/main.py [GLOBAL_OPTIONS] excel2xml --xml PATH_TO_XML --excel EDITED_X
 | `--no-progress` | Disable progress bars (recommended for CI/piped logs). |
 | `--version` | Show CLI version and exit. |
 | `--help` | Show command help. |
+
+---
+
+## Changelog & Versioning
+
+`git-cliff` is configured as the changelog and version-bump engine (`cliff.toml`).  
+The future GitHub release pipeline will be responsible for writing changelog updates, tagging, and publishing releases.
+
+Local dry-run workflow:
+
+```bash
+just bump-dry-run       # prints next semantic version from unreleased commits
+just changelog-unreleased   # preview unreleased section
+just changelog-dry-run      # preview unreleased section rendered as next release
+just release-dry-run        # shows current/next version + notes preview
+```
+
+When you want to regenerate the full changelog file locally:
+
+```bash
+just changelog
+```
+
+Dynamic version helpers are available via `scripts/versioning.py` and are used by:
+- `scripts/project_meta.py`
+- `scripts/generate_version_info.py`
+- CLI `--version` fallback resolution
 
 ---
 

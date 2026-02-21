@@ -6,6 +6,10 @@ coverage_threshold := "70"
 pyproject_file := "pyproject.toml"
 entrypoint := "app/main.py"
 version_info_file := "build/version_info.txt"
+version_script := "scripts/versioning.py"
+project_meta_script := "scripts/project_meta.py"
+cliff_config := "cliff.toml"
+semver_tag_pattern := "^v?[0-9]+\\.[0-9]+\\.[0-9]+$"
 
 default: help
 
@@ -24,25 +28,46 @@ sync: check-uv
 # Alias used by teams that prefer install terminology.
 install: sync
 
-# Print project metadata from pyproject.toml.
+# Print project metadata from pyproject.toml using current/tag-derived version.
 meta: check-uv
-    UV_CACHE_DIR={{uv_cache_dir}} uv run --no-sync python scripts/project_meta.py --pyproject {{pyproject_file}}
+    UV_CACHE_DIR={{uv_cache_dir}} uv run --no-sync python {{project_meta_script}} --pyproject {{pyproject_file}} --version-mode current
+
+# Print project metadata using the bumped (next) version.
+meta-next: check-uv
+    UV_CACHE_DIR={{uv_cache_dir}} uv run --no-sync python {{project_meta_script}} --pyproject {{pyproject_file}} --version-mode next
 
 # Generate version metadata file used by PyInstaller on Windows.
 version-info output=version_info_file: check-uv
     mkdir -p "$(dirname {{output}})"
-    UV_CACHE_DIR={{uv_cache_dir}} uv run --no-sync python scripts/generate_version_info.py --pyproject {{pyproject_file}} --output {{output}}
+    UV_CACHE_DIR={{uv_cache_dir}} uv run --no-sync python scripts/generate_version_info.py --pyproject {{pyproject_file}} --output {{output}} --version-mode current
+
+# Generate version metadata file using the bumped (next) version.
+version-info-next output=version_info_file: check-uv
+    mkdir -p "$(dirname {{output}})"
+    UV_CACHE_DIR={{uv_cache_dir}} uv run --no-sync python scripts/generate_version_info.py --pyproject {{pyproject_file}} --output {{output}} --version-mode next
 
 # Backward-compatible alias.
 version: version-info
 
 # Build a one-file executable with PyInstaller.
 # Intended to run on Windows for production artifacts.
-build: version-info
-    name="$$(UV_CACHE_DIR={{uv_cache_dir}} uv run --no-sync python scripts/project_meta.py --pyproject {{pyproject_file}} --field name)"
+build: check-uv
+    just version-info
     UV_CACHE_DIR={{uv_cache_dir}} uv run --with pyinstaller pyinstaller \
       --onefile \
-      --name "$${name}.exe" \
+      --name "$(UV_CACHE_DIR={{uv_cache_dir}} uv run --no-sync python {{project_meta_script}} --pyproject {{pyproject_file}} --field name).exe" \
+      {{entrypoint}} \
+      --version-file {{version_info_file}} \
+      --distpath dist \
+      --workpath build/pyinstaller \
+      --specpath build
+
+# Build a one-file executable stamped with the bumped (next) version.
+build-next: check-uv
+    just version-info-next
+    UV_CACHE_DIR={{uv_cache_dir}} uv run --with pyinstaller pyinstaller \
+      --onefile \
+      --name "$(UV_CACHE_DIR={{uv_cache_dir}} uv run --no-sync python {{project_meta_script}} --pyproject {{pyproject_file}} --field name).exe" \
       {{entrypoint}} \
       --version-file {{version_info_file}} \
       --distpath dist \
@@ -76,26 +101,49 @@ ci: lint typecheck test
 # Common developer flow.
 all: sync meta test build
 
+# Ensure git-cliff is installed.
+check-git-cliff:
+    @command -v git-cliff >/dev/null 2>&1 || { echo "git-cliff is required. Install: https://git-cliff.org/docs/installation/"; exit 1; }
+
 # Remove local build and cache artifacts.
 clean:
     rm -rf build dist __pycache__ .pytest_cache .mypy_cache .ruff_cache
-    rm -f *.spec version_info.txt batch_bulk_editor.log
+    rm -f *.spec {{version_info_file}} batch_bulk_editor.log
 
 doctor:
-	@echo "Checking local tools..."
-	@command -v just >/dev/null && echo "  just: ok" || echo "  just: missing"
-	@command -v git >/dev/null && echo "  git: ok" || echo "  git: missing"
-	@command -v cargo >/dev/null && echo "  cargo: ok" || echo "  cargo: missing"
-	@command -v git-cliff >/dev/null && echo "  git-cliff: ok" || echo "  git-cliff: missing (run: just install-git-cliff)"
-	@command -v yamllint -v >/dev/null && echo "  yamllint: ok" || echo "  yamllint: missing"
-	@command -v pre-commit -V >/dev/null && echo "  pre-commit: ok" || echo "  pre-commit: missing"
-	@command -v pre-commit install >/dev/null && echo "    all pre-commits: ok" || echo "  pre-commits: missing"
+    @echo "Checking local tools..."
+    @command -v just >/dev/null 2>&1 && echo "  just: ok" || echo "  just: missing"
+    @command -v git >/dev/null 2>&1 && echo "  git: ok" || echo "  git: missing"
+    @command -v cargo >/dev/null 2>&1 && echo "  cargo: ok" || echo "  cargo: missing"
+    @command -v git-cliff >/dev/null 2>&1 && echo "  git-cliff: ok" || echo "  git-cliff: missing"
+    @command -v pre-commit >/dev/null 2>&1 && echo "  pre-commit: ok" || echo "  pre-commit: missing"
+    @command -v yamllint >/dev/null 2>&1 && echo "  yamllint: ok" || echo "  yamllint: missing"
 
-changelog:
-	git cliff -o CHANGELOG.md
+# Generate the full changelog from tags into CHANGELOG.md.
+changelog: check-git-cliff
+    git-cliff --config {{cliff_config}} --tag-pattern '{{semver_tag_pattern}}' --output CHANGELOG.md
 
-changelog-unreleased:
-	git cliff --unreleased
+# Preview changelog content for unreleased commits.
+changelog-unreleased: check-git-cliff
+    git-cliff --config {{cliff_config}} --unreleased --tag-pattern '{{semver_tag_pattern}}'
 
-bump:
-	git cliff --bump --unreleased
+# Print the next semantic version from unreleased commits.
+bump-dry-run: check-git-cliff
+    git-cliff --config {{cliff_config}} --bumped-version --unreleased --tag-pattern '{{semver_tag_pattern}}'
+
+# Preview the unreleased changelog section rendered with the next semantic version.
+changelog-dry-run: check-git-cliff
+    next="$(git-cliff --config {{cliff_config}} --bumped-version --unreleased --tag-pattern '{{semver_tag_pattern}}')"; git-cliff --config {{cliff_config}} --unreleased --tag "${next}" --tag-pattern '{{semver_tag_pattern}}'
+
+# Show a local release simulation: current version, next version, and release notes preview.
+release-dry-run: check-uv check-git-cliff
+    current="$(UV_CACHE_DIR={{uv_cache_dir}} uv run --no-sync python {{version_script}} --pyproject {{pyproject_file}} --mode current)"; \
+    next="$(UV_CACHE_DIR={{uv_cache_dir}} uv run --no-sync python {{version_script}} --pyproject {{pyproject_file}} --mode next --tag-pattern '{{semver_tag_pattern}}')"; \
+    echo "Current version: ${current}"; \
+    echo "Next version:    ${next}"; \
+    echo; \
+    echo "Release notes preview:"; \
+    git-cliff --config {{cliff_config}} --unreleased --tag "${next}" --tag-pattern '{{semver_tag_pattern}}'
+
+# Backward-compatible alias.
+bump: bump-dry-run

@@ -6,17 +6,8 @@ from __future__ import annotations
 import argparse
 import re
 from pathlib import Path
-from typing import Any
 
-import tomllib
-
-
-def load_project_metadata(pyproject_path: Path) -> dict[str, Any]:
-    data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
-    project = data.get("project")
-    if not isinstance(project, dict):
-        raise ValueError(f"Missing [project] table in {pyproject_path}")
-    return project
+from versioning import load_project_metadata, resolve_current_version, resolve_next_version
 
 
 def windows_version_tuple(version: str) -> tuple[int, int, int, int]:
@@ -104,9 +95,21 @@ def main() -> int:
         default="",
         help="Copyright metadata for Windows file properties",
     )
+    parser.add_argument(
+        "--version-mode",
+        choices=["current", "next"],
+        default="current",
+        help="Version resolution mode when --version is not supplied",
+    )
+    parser.add_argument(
+        "--version",
+        default="",
+        help="Optional explicit version override",
+    )
     args = parser.parse_args()
 
-    project = load_project_metadata(Path(args.pyproject))
+    pyproject_path = Path(args.pyproject)
+    project = load_project_metadata(pyproject_path)
     authors = project.get("authors", [])
     company_name = args.company_name
     if not company_name and isinstance(authors, list) and authors:
@@ -114,9 +117,17 @@ def main() -> int:
         if isinstance(first_author, dict):
             company_name = str(first_author.get("name", ""))
 
+    resolved_version = args.version.strip()
+    if not resolved_version:
+        resolved_version = (
+            resolve_next_version(pyproject_path)
+            if args.version_mode == "next"
+            else resolve_current_version(pyproject_path)
+        )
+
     content = render_version_info(
         name=str(project.get("name", "")),
-        version=str(project.get("version", "")),
+        version=resolved_version,
         description=str(project.get("description", "")),
         company_name=company_name,
         copyright_text=args.copyright,
