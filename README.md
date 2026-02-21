@@ -132,26 +132,34 @@ just clean        # remove generated artifacts
 ### Export XML to Excel (`xml2excel`)
 
 ```bash
-python app/main.py xml2excel --xml PATH_TO_XML --excel OUTPUT_XLSX [--debug]
+python app/main.py [GLOBAL_OPTIONS] xml2excel --xml PATH_TO_XML --excel OUTPUT_XLSX
 ```
 
 | Argument  | Description                                                                       |
 | --------- | --------------------------------------------------------------------------------- |
 | `--xml`   | Parent file (`.pxml`, `.uxml`, or `.oxml`). Children loaded via `<StepRecipeID>`. |
 | `--excel` | Destination Excel workbook.                                                       |
-| `--debug` | Write DEBUG logs to `batch_bulk_editor.log`.                                      |
 
 ### Import Excel to XML (`excel2xml`)
 
 ```bash
-python app/main.py excel2xml --xml PATH_TO_XML --excel EDITED_XLSX [--debug]
+python app/main.py [GLOBAL_OPTIONS] excel2xml --xml PATH_TO_XML --excel EDITED_XLSX
 ```
 
 | Argument  | Description                                  |
 | --------- | -------------------------------------------- |
 | `--xml`   | Same parent file used for export.            |
 | `--excel` | Edited Excel workbook.                       |
+
+### Global Options
+
+| Option | Description |
+| --- | --- |
 | `--debug` | Write DEBUG logs to `batch_bulk_editor.log`. |
+| `--progress` | Force progress bars on. |
+| `--no-progress` | Disable progress bars. |
+| `--version` | Show CLI version and exit. |
+| `--help` | Show command help. |
 
 ---
 
@@ -165,6 +173,12 @@ python app/main.py --debug xml2excel --xml myRecipe.pxml --excel out.xlsx
 
 * Creates/appends `batch_bulk_editor.log` at DEBUG level.
 * Console remains at INFO level.
+
+Use `--progress` or `--no-progress` before the subcommand to control progress bars:
+
+```bash
+python app/main.py --no-progress excel2xml --xml myRecipe.pxml --excel edits.xlsx
+```
 
 ---
 
