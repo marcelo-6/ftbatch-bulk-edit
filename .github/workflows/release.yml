@@ -36,11 +36,6 @@ jobs:
           name: ${{ needs.build_windows.outputs.artifact_name }}
           path: release-assets
 
-      - name: Build checksums
-        run: |
-          cd release-assets
-          sha256sum *.exe > SHA256SUMS.txt
-
       - name: Extract release notes from changelog
         run: python .github/scripts/extract_latest_changelog.py --changelog CHANGELOG.md --output RELEASE_NOTES.md
 
@@ -52,4 +47,3 @@ jobs:
           body_path: RELEASE_NOTES.md
           files: |
             release-assets/*.exe
-            release-assets/SHA256SUMS.txt

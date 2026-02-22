@@ -23,6 +23,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get version from tag
+        id: version
+        run: |
+          VERSION=$(git describe --tags --abbrev=0)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Install uv
         uses: astral-sh/setup-uv@v7
 
@@ -37,13 +43,17 @@ jobs:
         id: meta
         shell: bash
         run: |
-          version="$(uv run --no-sync python scripts/versioning.py --pyproject pyproject.toml --mode current)"
-          name="$(uv run --no-sync python scripts/project_meta.py --pyproject pyproject.toml --field name)"
-          artifact_name="${name}-${version}-windows-exe"
-
           just build
 
-          echo "artifact_name=${artifact_name}" >> "${GITHUB_OUTPUT}"
+          # rename dist/<something>.exe -> dist/<something>-<tag>.exe
+          exe="$(ls -1 dist/*.exe | head -n 1)"
+          base="$(basename "$exe" .exe)"
+          version="${{ steps.version.outputs.version }}"
+          new="dist/${base}-${version}.exe"
+          mv "$exe" "$new"
+
+          artifact_name="${base}-${version}-windows-exe"
+          echo "artifact_name=${artifact_name}" >> "$GITHUB_OUTPUT"
 
       - name: Upload executable artifact
         uses: actions/upload-artifact@v6
