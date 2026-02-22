@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6] - 2026-02-22
+
+### <!-- 1 -->Bug Fixes
+- Run tag-version step with bash on windows runner  by @marcelo-6 ([070bc70](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/070bc70d63e2b4c24b3b6c7d57da513dec812c47))
+
+- Rename Windows exe to include tag version before upload  by @marcelo-6 ([9f96911](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/9f969113bc5b1a6032b31183d559e0b5f784a6e4))
+
+
 ## [0.2.5] - 2026-02-22
 
 ### <!-- 1 -->Bug Fixes
