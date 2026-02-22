@@ -137,15 +137,14 @@ all: sync meta test build
 # Build artifact (PyInstaller)
 # -----------------------------
 
-# Build a one-file executable with PyInstaller.
-# Intended to run on Windows for production artifacts.
+# Build a one-file executable with PyInstaller (needs windows).
 build: check-uv
     just version-info
     UV_CACHE_DIR={{uv_cache_dir}} uv run --with pyinstaller pyinstaller \
       --onefile \
       --name "$(UV_CACHE_DIR={{uv_cache_dir}} uv run --no-sync python {{project_meta_script}} --pyproject {{pyproject_file}} --field name).exe" \
       {{entrypoint}} \
-      --version-file {{version_info_file}} \
+      --version-file version_info.txt \
       --distpath dist \
       --workpath build/pyinstaller \
       --specpath build
