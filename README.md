@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD033 -->
 # Bulk Editor for FactoryTalk Batch Recipes
 
 [![CI](https://github.com/marcelo-6/ftbatch-bulk-edit/actions/workflows/ci.yml/badge.svg)](https://github.com/marcelo-6/ftbatch-bulk-edit/actions/workflows/ci.yml)
@@ -13,23 +14,20 @@ Useful for large recipes with many defered parameters</p>
 </blockquote>
 
 ---
-
-## Table of Contents
+<details>
+<summary>Table of Contents</summary>
 
 - [Bulk Editor for FactoryTalk Batch Recipes](#bulk-editor-for-factorytalk-batch-recipes)
-  - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Requirements](#requirements)
   - [Installation](#installation)
     - [Using pip](#using-pip)
-    - [Using a Python Virtual Environment](#using-a-python-virtual-environment)
     - [Using uv as the Package Manager](#using-uv-as-the-package-manager)
     - [Using the Justfile (Recommended)](#using-the-justfile-recommended)
   - [Usage Overview](#usage-overview)
     - [Export XML to Excel (`xml2excel`)](#export-xml-to-excel-xml2excel)
     - [Import Excel to XML (`excel2xml`)](#import-excel-to-xml-excel2xml)
     - [Global Options](#global-options)
-  - [Changelog \& Versioning](#changelog--versioning)
   - [Debug Mode](#debug-mode)
   - [Flow Chart](#flow-chart)
   - [Example Excel Output](#example-excel-output)
@@ -37,7 +35,7 @@ Useful for large recipes with many defered parameters</p>
   - [Preservation Rules \& Edge Cases](#preservation-rules--edge-cases)
   - [Troubleshooting](#troubleshooting)
 
----
+</details>
 
 ## Features
 
@@ -96,13 +94,13 @@ Useful for large recipes with many defered parameters</p>
 2. **Install** dependencies:
 
    ```bash
-   pip install lxml openpyxl
+   pip ftbatch-bulk-edit
    ```
 
 3. **Run**:
 
    ```bash
-   python app/main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
+   ftbatch-bulk-edit xml2excel --xml yourRecipe.pxml --excel out.xlsx
    ```
 
 ### Using uv as the Package Manager
@@ -112,13 +110,11 @@ uv sync --python 3.14
 uv run python app/main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
 ```
 
-#### Using the example in the repo:
+#### Using the example in the repo
 
 ```bash
 uv run python app/main.py --progress xml2excel --xml tests/examples/LNP/P_LNP.PXML --excel tests/examples/converted-outputs/output.xlsx
 ```
-
-
 
 ### Using the Justfile (Recommended)
 
@@ -189,9 +185,9 @@ Add `--debug` before the subcommand to capture detailed logs:
 python app/main.py --debug xml2excel --xml myRecipe.pxml --excel out.xlsx
 ```
 
-* Creates/appends `batch_bulk_editor.log` at DEBUG level.
-* Console logs are rendered with Rich coloring.
-* Repeated warning patterns are summarized in console output while debug file logs remain detailed.
+- Creates/appends `batch_bulk_editor.log` at DEBUG level.
+- Console logs are rendered with Rich coloring.
+- Repeated warning patterns are summarized in console output while debug file logs remain detailed.
 
 Use  `--no-progress` before the subcommand to control progress bars:
 
@@ -291,11 +287,12 @@ flowchart LR
 
 ## Preservation Rules & Edge Cases
 
-* **Empty Tags**: If a sub-element existed (even empty), it remains.
-* **Create FormulaValueLimit** only if `FormulaValueLimit_*` columns are non-blank or it existed originally.
-* **Type Enforcement**: Exactly one of Real, Integer, String, or EnumerationSet per row.
-* **Defer Validation**: A `<FormulaValue>`’s `Defer` must match a parameter name in the same sheet.
-  * Example output:
+- **Empty Tags**: If a sub-element existed (even empty), it remains.
+- **Create FormulaValueLimit** only if `FormulaValueLimit_*` columns are non-blank or it existed originally.
+- **Type Enforcement**: Exactly one of Real, Integer, String, or EnumerationSet per row.
+- **Defer Validation**: A `<FormulaValue>`’s `Defer` must match a parameter name in the same sheet.
+  - Example output:
+
 ```bash
 [30-May-2025 14:49:35]  ERROR:  CP_GMP_PROCEDURE.PXML!Row924: defer target 'DSTFP_TEMP_PROC2_TEMP_STATE_CMD' not found for CP_GMP_PROCEDURE/Steps/Step[UP_DSTFP_PROCESS:1]/FormulaValue[TEMP_PROC2_TEMP_STATE_CMD]
 ```
@@ -306,10 +303,10 @@ flowchart LR
 
 1. **No Sheet Found**
 
-   * Sheet name must match the XML filename (`TEST.pxml` → sheet “TEST.pxml”).
+   - Sheet name must match the XML filename (`TEST.pxml` → sheet “TEST.pxml”).
 2. **Missing Data-Type**
 
-   * Every Parameter or FormulaValue row must have one and only one data-type column.
+   - Every Parameter or FormulaValue row must have one and only one data-type column.
 3. **Need More Logs?**
 
-   * Add `--debug` to capture detailed steps in `batch_bulk_editor.log`.
+   - Add `--debug` to capture detailed steps in `batch_bulk_editor.log`.
