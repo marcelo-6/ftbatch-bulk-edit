@@ -21,9 +21,9 @@ readme = "README.md"
 license = "MIT"
 keywords = ["FactoryTalk Batch", "ftbatch", "ias88", "defer", "bulk edit"]
 classifiers = [
-  "Development Status :: 5 - Stable",
+#Development Status :: 5 - Production/Stable
+  "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.14",
 ]
 
@@ -47,25 +47,35 @@ dev = [
     "ruff>=0.13.0",
 ]
 
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
+
 [build-system]
-requires = [
-    "setuptools>=69",
-    "setuptools-scm[toml]>=8",
-    "wheel>=0.45",
-]
-build-backend = "setuptools.build_meta"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
-[tool.setuptools]
-package-dir = {"" = "app"}
-py-modules = ["main"]
-
-[tool.setuptools.packages.find]
-where = ["app"]
-
-[tool.setuptools_scm]
-fallback_version = "0.0.0"
-local_scheme = "no-local-version"
+[tool.pdm.version]
+source = "scm"
 tag_regex = "^(?:v)?(?P<version>\\d+\\.\\d+\\.\\d+)$"
+fallback_version = "0.0.0"
+
+[tool.pdm.build]
+package-dir = "app"
+includes = [
+  "app/cli/",
+  "app/core/",
+  "app/utils/",
+  "app/main.py",
+]
+source-includes = [
+  "tests/",
+  "README.md",
+  "CHANGELOG.md",
+  "LICENSE",
+]
 
 [tool.pytest.ini_options]
 pythonpath = [

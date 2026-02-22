@@ -1,4 +1,4 @@
-name: Publish PyPI
+name: Publish TestPyPI
 
 on:
   workflow_call:
@@ -6,30 +6,53 @@ on:
 
 env:
   PYTHON_VERSION: "3.14"
+  UV_PYTHON: "3.14"
+
+concurrency:
+  group: publish-testpypi
+  cancel-in-progress: false
 
 jobs:
   publish:
-    name: Build and publish to PyPI
+    name: Build and publish to TestPyPI
     runs-on: ubuntu-latest
     environment:
-      name: pypi
+      name: testpypi
     permissions:
-      id-token: write
       contents: read
+
+    env:
+      # TestPyPI auth (API token)
+      UV_PUBLISH_TOKEN: ${{ secrets.TEST_PYPI_API_TOKEN }}
+
     steps:
-      - name: Checkout
+      - name: Checkout (full history + tags)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
 
       - name: Install Python
         run: uv python install ${{ env.PYTHON_VERSION }}
 
-      - name: Build
+      # If NOT building on a release tag, force a unique dev version so TestPyPI
+      # doesn't reject "File already exists".
+      - name: Set CI version for non-tag builds (pdm-backend)
+        if: github.ref_type != 'tag'
+        run: echo "PDM_BUILD_SCM_VERSION=0.0.0.dev${{ github.run_number }}" >> "$GITHUB_ENV"
+
+      - name: Clean dist
+        run: rm -rf dist/
+
+      - name: Build (sdist + wheel)
         run: uv build
+
+      - name: Check metadata / README rendering
+        run: uvx twine check --strict dist/*
 
       - name: Smoke test (wheel)
         run: uv run --isolated --no-project --with dist/*.whl tests/smoke_test.py
@@ -37,5 +60,5 @@ jobs:
       - name: Smoke test (source distribution)
         run: uv run --isolated --no-project --with dist/*.tar.gz tests/smoke_test.py
 
-      - name: Publish
-        run: uv publish
+      - name: Publish (TestPyPI)
+        run: uv publish --publish-url https://test.pypi.org/legacy/
