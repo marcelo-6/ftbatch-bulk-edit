@@ -40,6 +40,20 @@ jobs:
 
       - name: Install just
         uses: taiki-e/install-action@just
+        
+      - name: Publish (TestPyPI) via just (with retries)
+        shell: bash
+        run: |
+          set -euo pipefail
+          version='${{ steps.version.outputs.version }}'
 
-      - name: Publish (TestPyPI) via just
-        run: just publish-testpypi ${{ steps.version.outputs.version }}
+          for attempt in 1 2 3 4 5; do
+            echo "Publish attempt ${attempt}/5"
+            if just publish-testpypi "${version}"; then
+              exit 0
+            fi
+            sleep $((attempt * attempt * 5))
+          done
+
+          echo "Publish failed after retries"
+          exit 1
