@@ -6,6 +6,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-02-22
+
+### <!-- 1 -->Bug Fixes
+- Use windows-shell (Git Bash) to avoid WSL bash on GitHub runners  by @marcelo-6 ([dbbcac0](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/dbbcac049285e4239407b050f9e8e84736004f71))
+
+
+### <!-- 3 -->Documentation
+- Changed development status to stable  by @marcelo-6 ([7a234e3](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/7a234e334c8486245dc0fb9c41f581560faa9f15))
+
+- Preparing for pypi release  by @marcelo-6 ([9c21a5a](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/9c21a5abe0189d6f6b7d0b38d8032948aba80755))
+
+- Added license  by @marcelo-6 ([07df3a4](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/07df3a4d269c1903c0359907a22f858a0421edac))
+
+- Cleaner documentation  by @marcelo-6 ([e21353c](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/e21353c91d19e865dc3f1e16e44b417144e4a07a))
+
+
+### <!-- 7 -->Miscellaneous Tasks
+- Simplified publish it seems test.pypi gives 503 even on success  by @marcelo-6 ([cbf1fa9](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/cbf1fa9b4f0ea2a367a4b324fcc95f149c5f0ce1))
+
+- Added retry to publish step  by @marcelo-6 ([2aa41c9](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/2aa41c9b674969f040880949d4db8bbdb82e0ee4))
+
+- Updated to accept windows shell for windows build  by @marcelo-6 ([1b26923](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/1b26923196d91e3231f6adbf97be1551ef11bd94))
+
+- Updated action versions to latest  by @marcelo-6 ([e180f01](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/e180f01c8e3ef19ff16868d91bee372d83c835fd))
+
+- Added dynamic release version to pypi publish step  by @marcelo-6 ([08c631b](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/08c631baa3adb628c605ec5f0776a6628fade121))
+
+- Route GitHub workflows through just and centralize packaging/publish commands  by @marcelo-6 ([a15d66c](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/a15d66c1ba497be6df1a704369a7a217ae9cf78a))
+
+
+### Other
+- Fixing failed build  by @marcelo-6 ([5833d15](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/5833d15ce70f964575e65ed9e3b3fff4feac21c7))
+
+- Added better tooling to locally test publish pipeline  by @marcelo-6 ([65a6b92](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/65a6b92e61eced8bacd497f26d84be6cc47fa949))
+
+
 ## [0.2.0] - 2026-02-21
 
 ### <!-- 0 -->Features
