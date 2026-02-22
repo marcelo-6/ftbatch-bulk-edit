@@ -2,10 +2,10 @@
 name = "ftbatch-bulk-edit"
 dynamic = ["version"]
 authors = [
-  { name = "Marcelo Amorim", email = "marcelo.amorim@wmeng.com" },
+  { name = "Marcelo Amorim", email = "marc.amorim6@gmail.com" },
   { name = "Dan Nguyen", email = "dan.nguyen@wmeng.com" },
 ]
-description = "FactoryTalk Batch Bulk Editor"
+description = "FactoryTalk Batch Recipe Bulk Editor"
 readme = "README.md"
 requires-python = ">=3.14,<3.15"
 dependencies = [

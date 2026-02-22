@@ -5,7 +5,12 @@
 [![Coverage](https://img.shields.io/badge/coverage-gate%20%E2%89%A570%25-blue)](https://github.com/marcelo-6/ftbatch-bulk-edit/actions/workflows/ci.yml)
 [![PyPI version](https://img.shields.io/pypi/v/ftbatch-bulk-edit.svg)](https://pypi.org/project/ftbatch-bulk-edit/)
 
-A command-line tool (Python-based) that lets engineers bulk-edit Rockwell FactoryTalk Batch S88 recipes (`.pxml`, `.uxml`, and `.oxml`) by round-tripping through Excel. You can **export** your recipes (including any child references) into a spreadsheet, make batch changes to parameters and formula-values, then **import** the edits back to produce updated XML files—preserving element order, empty tags, and original structure.
+A command-line tool that lets you bulk-edit Rockwell FactoryTalk Batch S88 recipes (`.pxml`, `.uxml`, and `.oxml`) using Excel. You can **export** your recipes into a spreadsheet, make bulk changes to parameters and formula-values, then **import** the edits back to produce updated XML files. It will presere element order, empty tags, and original structure.
+
+<blockquote>
+<p>[!NOTE]
+Useful for large recipes with many defered parameters</p>
+</blockquote>
 
 ---
 
@@ -71,11 +76,17 @@ A command-line tool (Python-based) that lets engineers bulk-edit Rockwell Factor
 
 ## Requirements
 
-- **Python 3.14 only**
-- **lxml**
-- **openpyxl**
+- Python 3.14 (in theory 3.10+)
+- Dependencies
+  - For xml and excel work:
+    - lxml
+    - openpyxl
+  - For CLI:
+    - typer
 
 ---
+<details>
+<summary>Installation</summary>
 
 ## Installation
 
@@ -94,32 +105,20 @@ A command-line tool (Python-based) that lets engineers bulk-edit Rockwell Factor
    python app/main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
    ```
 
-### Using a Python Virtual Environment
-
-1. ```bash
-   python -m venv venv
-   ```
-2. Activate it:
-
-   * Windows: `venv\Scripts\activate`
-   * macOS/Linux: `source venv/bin/activate`
-3. Install:
-
-   ```bash
-   pip install lxml openpyxl
-   ```
-4. Run:
-
-   ```bash
-   python app/main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
-   ```
-
 ### Using uv as the Package Manager
 
 ```bash
 uv sync --python 3.14
 uv run python app/main.py xml2excel --xml yourRecipe.pxml --excel out.xlsx
 ```
+
+#### Using the example in the repo:
+
+```bash
+uv run python app/main.py --progress xml2excel --xml tests/examples/LNP/P_LNP.PXML --excel tests/examples/converted-outputs/output.xlsx
+```
+
+
 
 ### Using the Justfile (Recommended)
 
@@ -140,8 +139,7 @@ just version-info # generate build/version_info.txt
 just build        # build one-file executable with PyInstaller
 just clean        # remove generated artifacts
 ```
-
----
+</details>
 
 ## Usage Overview
 
@@ -172,37 +170,9 @@ python app/main.py [GLOBAL_OPTIONS] excel2xml --xml PATH_TO_XML --excel EDITED_X
 | Option | Description |
 | --- | --- |
 | `--debug` | Write DEBUG logs to `batch_bulk_editor.log`. |
-| `--progress` | Force rich progress bars on. |
-| `--no-progress` | Disable progress bars (recommended for CI/piped logs). |
+| `--no-progress` | Disable progress bars |
 | `--version` | Show CLI version and exit. |
 | `--help` | Show command help. |
-
----
-
-## Changelog & Versioning
-
-`git-cliff` is configured as the changelog and version-bump engine (`cliff.toml`).  
-The future GitHub release pipeline will be responsible for writing changelog updates, tagging, and publishing releases.
-
-Local dry-run workflow:
-
-```bash
-just bump-dry-run       # prints next semantic version from unreleased commits
-just changelog-unreleased   # preview unreleased section
-just changelog-dry-run      # preview unreleased section rendered as next release
-just release-dry-run        # shows current/next version + notes preview
-```
-
-When you want to regenerate the full changelog file locally:
-
-```bash
-just changelog
-```
-
-Dynamic version helpers are available via `scripts/versioning.py` and are used by:
-- `scripts/project_meta.py`
-- `scripts/generate_version_info.py`
-- CLI `--version` fallback resolution
 
 ---
 
@@ -218,7 +188,7 @@ python app/main.py --debug xml2excel --xml myRecipe.pxml --excel out.xlsx
 * Console logs are rendered with Rich coloring.
 * Repeated warning patterns are summarized in console output while debug file logs remain detailed.
 
-Use `--progress` or `--no-progress` before the subcommand to control progress bars:
+Use  `--no-progress` before the subcommand to control progress bars:
 
 ```bash
 python app/main.py --no-progress excel2xml --xml myRecipe.pxml --excel edits.xlsx
