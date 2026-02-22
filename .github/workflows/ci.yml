@@ -14,13 +14,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  PYTHON_VERSION: "3.14"
-  COVERAGE_THRESHOLD: "70"
-
 jobs:
   quality:
-    name: Lint, Typecheck, Tests, Coverage
+    name: Lint, Tests, Coverage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,20 +25,8 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
 
-      - name: Install Python
-        run: uv python install ${{ env.PYTHON_VERSION }}
+      - name: Install just
+        uses: taiki-e/install-action@just
 
-      - name: Sync dependencies
-        run: uv sync --python ${{ env.PYTHON_VERSION }} --all-groups
-
-      - name: Lint (Ruff)
-        run: uv run --no-sync ruff check app tests scripts
-
-      # - name: Typecheck (Mypy)
-      #   run: uv run --no-sync mypy app
-
-      - name: Test with coverage
-        run: uv run --no-sync coverage run -m pytest --disable-warnings -q
-
-      - name: Enforce coverage threshold
-        run: uv run --no-sync coverage report --fail-under "${COVERAGE_THRESHOLD}"
+      - name: Run CI checks
+        run: just ci-check

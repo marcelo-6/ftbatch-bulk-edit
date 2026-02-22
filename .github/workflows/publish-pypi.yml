@@ -4,10 +4,6 @@ on:
   workflow_call:
   workflow_dispatch:
 
-env:
-  PYTHON_VERSION: "3.14"
-  UV_PYTHON: "3.14"
-
 concurrency:
   group: publish-testpypi
   cancel-in-progress: false
@@ -36,29 +32,8 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Install Python
-        run: uv python install ${{ env.PYTHON_VERSION }}
+      - name: Install just
+        uses: taiki-e/install-action@just
 
-      # If NOT building on a release tag, force a unique dev version so TestPyPI
-      # doesn't reject "File already exists".
-      - name: Set CI version for non-tag builds (pdm-backend)
-        if: github.ref_type != 'tag'
-        run: echo "PDM_BUILD_SCM_VERSION=0.0.0.dev${{ github.run_number }}" >> "$GITHUB_ENV"
-
-      - name: Clean dist
-        run: rm -rf dist/
-
-      - name: Build (sdist + wheel)
-        run: uv build
-
-      - name: Check metadata / README rendering
-        run: uvx twine check --strict dist/*
-
-      - name: Smoke test (wheel)
-        run: uv run --isolated --no-project --with dist/*.whl tests/smoke_test.py
-
-      - name: Smoke test (source distribution)
-        run: uv run --isolated --no-project --with dist/*.tar.gz tests/smoke_test.py
-
-      - name: Publish (TestPyPI)
-        run: uv publish --publish-url https://test.pypi.org/legacy/
+      - name: Publish (TestPyPI) via just
+        run: just publish-testpypi

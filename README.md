@@ -127,11 +127,15 @@ We provide a `justfile` to automate setup, testing, linting, coverage, and execu
 ```bash
 just help         # list recipes
 just sync         # install deps for Python 3.14
+just ci-check     # CI parity (lint + tests + coverage threshold)
 just test         # run tests
 just lint         # run Ruff lint checks
 just cov          # run tests with coverage threshold
+just package      # build sdist/wheel + twine check + smoke tests
+UV_PUBLISH_TOKEN=... just publish-testpypi-dry   # TestPyPI auth/check dry-run
+UV_PUBLISH_TOKEN=... just publish-testpypi       # publish to TestPyPI
+just verify-install-testpypi # install from TestPyPI + smoke test
 just bump-dry-run # print next semver from unreleased commits
-just changelog-unreleased # preview unreleased section
 just changelog-dry-run   # preview unreleased section with bumped version
 just release-dry-run     # show current/next version + release notes preview
 just changelog    # write full CHANGELOG.md from git tags
@@ -139,6 +143,7 @@ just version-info # generate build/version_info.txt
 just build        # build one-file executable with PyInstaller
 just clean        # remove generated artifacts
 ```
+
 </details>
 
 ## Usage Overview
