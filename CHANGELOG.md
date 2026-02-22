@@ -6,6 +6,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] - 2026-02-22
+
+### <!-- 1 -->Bug Fixes
+- Run create_release even if publish_pypi fails by using always() while requiring windows build success  by @marcelo-6 ([174a039](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/174a039267459605198311cfe526f7c5bde58779))
+
+
 ## [0.2.4] - 2026-02-22
 
 ### <!-- 7 -->Miscellaneous Tasks
