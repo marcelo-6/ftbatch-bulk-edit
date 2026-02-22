@@ -239,7 +239,7 @@ publish-testpypi version="": check-testpypi-token
     token="${UV_PUBLISH_TOKEN:-${TEST_PYPI_API_TOKEN:-}}"; \
     UV_PUBLISH_TOKEN="$token" UV_CACHE_DIR={{uv_cache_dir}} uv publish \
       --publish-url {{testpypi_publish_url}} \
-      --check-url {{testpypi_check_url}}
+#   --check-url {{testpypi_check_url}}
 
 # Install from TestPyPI (falls back to PyPI for dependencies) and run smoke test.
 verify-install-testpypi:
