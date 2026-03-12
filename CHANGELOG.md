@@ -6,6 +6,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.8] - 2026-03-12
+
+### <!-- 7 -->Miscellaneous Tasks
+- Bump actions/upload-artifact from 6 to 7  by @dependabot[bot] in [#9](https://github.com/marcelo-6/ftbatch-bulk-edit/pull/9) ([0c66fd8](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/0c66fd8350e86dcde4cb962865804ce369bd88ae))
+
+- Bump actions/download-artifact from 7 to 8  by @dependabot[bot] in [#8](https://github.com/marcelo-6/ftbatch-bulk-edit/pull/8) ([6ea09d5](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/6ea09d585360651feeb0fa7f1b7b79fe537eeec5))
+
+
+### New Contributors
+* @dependabot[bot] made their first contribution in [#9](https://github.com/marcelo-6/ftbatch-bulk-edit/pull/9)
+
 ## [0.2.7] - 2026-03-12
 
 ### Other
