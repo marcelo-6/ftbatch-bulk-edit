@@ -6,6 +6,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.9] - 2026-06-03
+
+### <!-- 3 -->Documentation
+- Update README badges  by @marcelo-6 ([c4128d0](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/c4128d03f0787b28367aa2428d521cad9a02fa46))
+
+
+### <!-- 7 -->Miscellaneous Tasks
+- Bump softprops/action-gh-release from 2 to 3  by @dependabot[bot] in [#15](https://github.com/marcelo-6/ftbatch-bulk-edit/pull/15) ([ee3067e](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/ee3067e7e3c8b87b1b224801ccee7a9d1a80609f))
+
+
+### Other
+- Bump pygments from 2.19.2 to 2.20.0  by @dependabot[bot] in [#11](https://github.com/marcelo-6/ftbatch-bulk-edit/pull/11) ([bfb09e4](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/bfb09e4c7f4463141402aec18f03f48dfcce7154))
+
+- Bump lxml from 6.0.2 to 6.1.0  by @dependabot[bot] in [#14](https://github.com/marcelo-6/ftbatch-bulk-edit/pull/14) ([9171dbb](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/9171dbb5741b2da7865bdbd9b6abccd9c6ac2583))
+
+- Bump the patch group across 1 directory with 2 updates  by @dependabot[bot] in [#17](https://github.com/marcelo-6/ftbatch-bulk-edit/pull/17) ([bfccbc8](https://github.com/marcelo-6/ftbatch-bulk-edit/commit/bfccbc8c8f2c3308105d26156d14a466f84e787b))
+
+
 ## [0.2.8] - 2026-03-12
 
 ### <!-- 7 -->Miscellaneous Tasks
